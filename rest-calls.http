@@ -1,0 +1,12 @@
+
+### get
+GET http://localhost:26769/health
+
+
+### post
+POST http://localhost:26769/ HTTP/1.1
+content-type: application/json
+
+{
+    "value": true
+}

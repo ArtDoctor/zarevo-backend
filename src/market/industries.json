@@ -1,0 +1,225 @@
+{
+  "sectors": [
+    {
+      "code": 10,
+      "name": "Energy",
+      "industries": [
+        {"name": "Oil & Gas Drilling", "sizes": [151700, 161400, 171700, 182700]},
+        {"name": "Oil & Gas Equipment & Services", "sizes": []},
+        {"name": "Integrated Oil & Gas", "sizes": []},
+        {"name": "Oil & Gas Exploration & Production", "sizes": []},
+        {"name": "Oil & Gas Refining & Marketing", "sizes": []},
+        {"name": "Oil & Gas Storage & Transportation", "sizes": []},
+        {"name": "Coal & Consumable Fuels", "sizes": []}
+      ]
+    },
+    {
+      "code": 15,
+      "name": "Materials",
+      "industries": [
+        {"name": "Commodity Chemicals", "sizes": []},
+        {"name": "Diversified Chemicals", "sizes": []},
+        {"name": "Fertilizers & Agricultural Chemicals", "sizes": []},
+        {"name": "Industrial Gases", "sizes": []},
+        {"name": "Specialty Chemicals", "sizes": []},
+        {"name": "Construction Materials", "sizes": []},
+        {"name": "Metal, Glass & Plastic Containers", "sizes": []},
+        {"name": "Paper & Plastic Packaging Products & Materials", "sizes": []},
+        {"name": "Aluminum", "sizes": []},
+        {"name": "Diversified Metals & Mining", "sizes": []},
+        {"name": "Copper", "sizes": []},
+        {"name": "Gold", "sizes": []},
+        {"name": "Precious Metals & Minerals", "sizes": []},
+        {"name": "Silver", "sizes": []},
+        {"name": "Steel", "sizes": []},
+        {"name": "Forest Products", "sizes": []},
+        {"name": "Paper Products", "sizes": []}
+      ]
+    },
+    {
+      "code": 20,
+      "name": "Industrials",
+      "industries": [
+        {"name": "Aerospace & Defense", "sizes": []},
+        {"name": "Building Products", "sizes": []},
+        {"name": "Construction & Engineering", "sizes": []},
+        {"name": "Electrical Components & Equipment", "sizes": []},
+        {"name": "Heavy Electrical Equipment", "sizes": []},
+        {"name": "Industrial Conglomerates", "sizes": []},
+        {"name": "Construction Machinery & Heavy Transportation Equipment", "sizes": []},
+        {"name": "Agricultural & Farm Machinery", "sizes": []},
+        {"name": "Industrial Machinery & Supplies & Components", "sizes": []},
+        {"name": "Trading Companies & Distributors", "sizes": []},
+        {"name": "Commercial Printing", "sizes": []},
+        {"name": "Environmental & Facilities Services", "sizes": []},
+        {"name": "Office Services & Supplies", "sizes": []},
+        {"name": "Diversified Support Services", "sizes": []},
+        {"name": "Security & Alarm Services", "sizes": []},
+        {"name": "Human Resource & Employment Services", "sizes": []},
+        {"name": "Research & Consulting Services", "sizes": []},
+        {"name": "Data Processing & Outsourced Services", "sizes": []},
+        {"name": "Air Freight & Logistics", "sizes": []},
+        {"name": "Passenger Airlines", "sizes": []},
+        {"name": "Cargo Ground Transportation", "sizes": []},
+        {"name": "Passenger Ground Transportation", "sizes": []},
+        {"name": "Rail Transportation", "sizes": []},
+        {"name": "Airport Services", "sizes": []},
+        {"name": "Highways & Railtracks", "sizes": []},
+        {"name": "Marine Ports & Services", "sizes": []}
+      ]
+    },
+    {
+      "code": 25,
+      "name": "Consumer Discretionary",
+      "industries": [
+        {"name": "Auto Parts & Equipment", "sizes": []},
+        {"name": "Tires & Rubber", "sizes": []},
+        {"name": "Automobile Manufacturers", "sizes": []},
+        {"name": "Motorcycle Manufacturers", "sizes": []},
+        {"name": "Consumer Electronics", "sizes": []},
+        {"name": "Home Furnishings", "sizes": []},
+        {"name": "Homebuilding", "sizes": []},
+        {"name": "Household Appliances", "sizes": []},
+        {"name": "Housewares & Specialties", "sizes": []},
+        {"name": "Leisure Products", "sizes": []},
+        {"name": "Apparel, Accessories & Luxury Goods", "sizes": []},
+        {"name": "Footwear", "sizes": []},
+        {"name": "Textiles", "sizes": []},
+        {"name": "Casinos & Gaming", "sizes": []},
+        {"name": "Hotels, Resorts & Cruise Lines", "sizes": []},
+        {"name": "Leisure Facilities", "sizes": []},
+        {"name": "Restaurants", "sizes": []},
+        {"name": "Education Services", "sizes": []},
+        {"name": "Specialized Consumer Services", "sizes": []},
+        {"name": "Broadline Retail", "sizes": []},
+        {"name": "Apparel Retail", "sizes": []},
+        {"name": "Computer & Electronics Retail", "sizes": []},
+        {"name": "Home Improvement Retail", "sizes": []},
+        {"name": "Specialty Stores", "sizes": []},
+        {"name": "Automotive Retail", "sizes": []},
+        {"name": "Homefurnishing Retail", "sizes": []}
+      ]
+    },
+    {
+      "code": 30,
+      "name": "Consumer Staples",
+      "industries": [
+        {"name": "Drug Retail", "sizes": []},
+        {"name": "Food Distributors", "sizes": []},
+        {"name": "Food Retail", "sizes": []},
+        {"name": "Consumer Staples Merchandise Retail", "sizes": []},
+        {"name": "Brewers", "sizes": []},
+        {"name": "Distillers & Vintners", "sizes": []},
+        {"name": "Soft Drinks & Non-alcoholic Beverages", "sizes": []},
+        {"name": "Agricultural Products & Services", "sizes": []},
+        {"name": "Packaged Foods & Meats", "sizes": []},
+        {"name": "Tobacco", "sizes": []},
+        {"name": "Household Products", "sizes": []},
+        {"name": "Personal Care Products", "sizes": []}
+      ]
+    },
+    {
+      "code": 35,
+      "name": "Health Care",
+      "industries": [
+        {"name": "Health Care Equipment", "sizes": []},
+        {"name": "Health Care Supplies", "sizes": []},
+        {"name": "Health Care Distributors", "sizes": []},
+        {"name": "Health Care Services", "sizes": []},
+        {"name": "Health Care Facilities", "sizes": []},
+        {"name": "Managed Health Care", "sizes": []},
+        {"name": "Health Care Technology", "sizes": []},
+        {"name": "Biotechnology", "sizes": []},
+        {"name": "Pharmaceuticals", "sizes": []},
+        {"name": "Life Sciences Tools & Services", "sizes": []}
+      ]
+    },
+    {
+      "code": 40,
+      "name": "Financials",
+      "industries": [
+        {"name": "Diversified Banks", "sizes": []},
+        {"name": "Regional Banks", "sizes": []},
+        {"name": "Diversified Financial Services", "sizes": []},
+        {"name": "Multi-Sector Holdings", "sizes": []},
+        {"name": "Specialized Finance", "sizes": []},
+        {"name": "Commercial & Residential Mortgage Finance", "sizes": []},
+        {"name": "Transaction & Payment Processing Services", "sizes": []},
+        {"name": "Asset Management & Custody Banks", "sizes": []},
+        {"name": "Investment Banking & Brokerage", "sizes": []},
+        {"name": "Diversified Capital Markets", "sizes": []},
+        {"name": "Financial Exchanges & Data", "sizes": []},
+        {"name": "Insurance Brokers", "sizes": []},
+        {"name": "Life & Health Insurance", "sizes": []},
+        {"name": "Multi-line Insurance", "sizes": []},
+        {"name": "Property & Casualty Insurance", "sizes": []},
+        {"name": "Reinsurance", "sizes": []}
+      ]
+    },
+    {
+      "code": 45,
+      "name": "Information Technology",
+      "industries": [
+        {"name": "IT Consulting & Other Services", "sizes": []},
+        {"name": "Internet Services & Infrastructure", "sizes": []},
+        {"name": "Application Software", "sizes": []},
+        {"name": "Systems Software", "sizes": []},
+        {"name": "Communications Equipment", "sizes": []},
+        {"name": "Technology Hardware, Storage & Peripherals", "sizes": []},
+        {"name": "Electronic Equipment & Instruments", "sizes": []},
+        {"name": "Electronic Components", "sizes": []},
+        {"name": "Electronic Manufacturing Services", "sizes": []},
+        {"name": "Technology Distributors", "sizes": []},
+        {"name": "Semiconductor Equipment", "sizes": []},
+        {"name": "Semiconductors", "sizes": []}
+      ]
+    },
+    {
+      "code": 50,
+      "name": "Communication Services",
+      "industries": [
+        {"name": "Alternative Carriers", "sizes": []},
+        {"name": "Integrated Telecommunication Services", "sizes": []},
+        {"name": "Wireless Telecommunication Services", "sizes": []},
+        {"name": "Advertising", "sizes": []},
+        {"name": "Broadcasting", "sizes": []},
+        {"name": "Cable & Satellite", "sizes": []},
+        {"name": "Publishing", "sizes": []},
+        {"name": "Movies & Entertainment", "sizes": []},
+        {"name": "Interactive Home Entertainment", "sizes": []},
+        {"name": "Interactive Media & Services", "sizes": []}
+      ]
+    },
+    {
+      "code": 55,
+      "name": "Utilities",
+      "industries": [
+        {"name": "Electric Utilities", "sizes": []},
+        {"name": "Gas Utilities", "sizes": []},
+        {"name": "Multi-Utilities", "sizes": []},
+        {"name": "Water Utilities", "sizes": []},
+        {"name": "Independent Power Producers & Energy Traders", "sizes": []},
+        {"name": "Renewable Electricity", "sizes": []}
+      ]
+    },
+    {
+      "code": 60,
+      "name": "Real Estate",
+      "industries": [
+        {"name": "Diversified REITs", "sizes": []},
+        {"name": "Industrial REITs", "sizes": []},
+        {"name": "Hotel & Resort REITs", "sizes": []},
+        {"name": "Office REITs", "sizes": []},
+        {"name": "Health Care REITs", "sizes": []},
+        {"name": "Residential REITs", "sizes": []},
+        {"name": "Retail REITs", "sizes": []},
+        {"name": "Specialized REITs", "sizes": []},
+        {"name": "Telecom Tower REITs", "sizes": []},
+        {"name": "Timber REITs", "sizes": []},
+        {"name": "Real Estate Development", "sizes": []},
+        {"name": "Real Estate Operating Companies", "sizes": []},
+        {"name": "Real Estate Services", "sizes": []}
+      ]
+    }
+  ]
+}

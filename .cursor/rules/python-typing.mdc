@@ -1,0 +1,25 @@
+---
+description: Python typing standards - proper types, Pydantic over dicts
+globs: **/*.py
+alwaysApply: true
+---
+
+- **Type all functions**: Every Python function must have proper type hints for parameters and return values.
+- **Minimize dictionary usage**: Avoid raw `dict` for structured data; prefer Pydantic models.
+- **Prefer Pydantic**: Use Pydantic `BaseModel` for request/response bodies, config, and any structured data.
+
+```python
+# ❌ BAD
+def process_user(data: dict) -> dict:
+    return {"name": data["name"], "id": data["id"]}
+
+# ✅ GOOD
+from pydantic import BaseModel
+
+class User(BaseModel):
+    name: str
+    id: int
+
+def process_user(data: User) -> User:
+    return User(name=data.name, id=data.id)
+```
