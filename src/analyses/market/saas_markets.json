@@ -1,0 +1,72 @@
+{
+    "saas_markets": [
+      {
+        "type": "Horizontal SaaS",
+        "description": "Software serving a specific business function across multiple industries.",
+        "categories": [
+          {
+            "name": "Sales & CRM",
+            "sub_categories": ["Sales Enablement", "Customer Success", "Lead Generation", "CPQ (Configure, Price, Quote)"]
+          },
+          {
+            "name": "Marketing Technology (MarTech)",
+            "sub_categories": ["Marketing Automation", "SEO/SEM Tools", "Social Media Management", "Content Management System (CMS)"]
+          },
+          {
+            "name": "Human Resources (HRIS & HRTech)",
+            "sub_categories": ["Applicant Tracking System (ATS)", "Payroll & Benefits", "Employee Engagement", "Workforce Management"]
+          },
+          {
+            "name": "Finance & Accounting",
+            "sub_categories": ["Invoicing & Billing", "Expense Management", "Tax Compliance", "Financial Planning & Analysis (FP&A)"]
+          },
+          {
+            "name": "DevOps & IT Management",
+            "sub_categories": ["Cloud Infrastructure", "CI/CD", "Monitoring & Logging", "Cybersecurity", "Identity & Access Management (IAM)"]
+          },
+          {
+            "name": "Productivity & Collaboration",
+            "sub_categories": ["Project Management", "Team Communication", "Document Management", "Whiteboarding"]
+          },
+          {
+            "name": "Data & Analytics",
+            "sub_categories": ["Business Intelligence (BI)", "Data Warehousing", "Customer Data Platforms (CDP)"]
+          }
+        ]
+      },
+      {
+        "type": "Vertical SaaS",
+        "description": "Software serving various functions within one specific industry.",
+        "categories": [
+          {
+            "name": "FinTech",
+            "sub_categories": ["Payment Processing", "Wealth Management", "InsurTech", "Lending Software"]
+          },
+          {
+            "name": "HealthTech",
+            "sub_categories": ["Telemedicine", "Electronic Health Records (EHR)", "Practice Management", "Medical Billing"]
+          },
+          {
+            "name": "EdTech",
+            "sub_categories": ["Learning Management Systems (LMS)", "Student Information Systems", "Corporate Training"]
+          },
+          {
+            "name": "PropTech (Real Estate)",
+            "sub_categories": ["Property Management", "Leasing Software", "Construction Management", "Facility Management"]
+          },
+          {
+            "name": "Retail & E-commerce",
+            "sub_categories": ["Point of Sale (POS)", "Inventory Management", "Storefront Platforms", "Supply Chain Management"]
+          },
+          {
+            "name": "LegalTech",
+            "sub_categories": ["Practice Management", "E-Discovery", "Contract Lifecycle Management (CLM)"]
+          },
+          {
+            "name": "GovTech",
+            "sub_categories": ["Civic Engagement", "Permitting & Licensing", "Public Safety Software"]
+          }
+        ]
+      }
+    ]
+  }

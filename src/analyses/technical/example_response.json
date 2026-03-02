@@ -1,0 +1,17 @@
+{
+    "toughness": 2,
+    "overview": "overview - how technically challenging this is, what are the main challenges",
+    "suggested_tech_stack": "this text includes suggested tech stack, such as python, javascript, etc. for the simplest version of the product",
+    "scaling_considertions": "this text includes scaling considerations, such as how to scale the product, what are the main challenges, what are the potential problems",
+    "no_code_viability": "is this product viable without code? if yes, how? if no, why not?",
+    "ideal_team": "this text includes ideal team, such as developer, designer, etc.",
+    "strengths": [
+        "this text includes strengths of the technical solution, such as scalability, etc.",
+        "this text includes strengths of the technical solution, such as scalability, etc."
+    ],
+    "weaknesses": [
+        "this text includes weaknesses of the technical solution, such as scalability, etc.",
+        "this text includes weaknesses of the technical solution, such as scalability, etc."
+    ],
+    "score": 80
+}

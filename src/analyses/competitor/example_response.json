@@ -1,0 +1,25 @@
+{
+    "competitors": [
+        {
+            "name": "competitor 1",
+            "description": "this text includes description of the competitor, such as size, growth, etc.",
+            "revenue": "100 million USD",
+            "features": "this startup can provide feature 1 and 2",
+            "strengths": "this startup offers this in a unique way",
+            "weaknesses": "this startup has this weakness and it kinda sucks actually",
+            "online_presence": "this startup is present on social media platforms like x, instagram, etc."
+
+        },
+        {
+            "name": "competitor 2",
+            "description": "this text includes description of the competitor, such as size, growth, etc.",
+            "revenue": "100 million USD",
+            "features": "this startup can provide feature 1 and 2",
+            "strengths": "this startup offers this in a unique way",
+            "weaknesses": "this startup has this weakness and it kinda sucks actually",
+            "online_presence": "this startup is present on social media platforms like x, instagram, etc."
+        }
+    ],
+    "overview": "summary of the competitors and current situation in the market",
+    "score": 90
+}

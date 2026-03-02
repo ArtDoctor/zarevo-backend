@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 import requests
 
 from src.config import settings, IdeaRequest
-from worker.worker import process_idea_task
+from worker.worker import ANALYSIS_HANDLERS, process_idea_task
 
 
 router = APIRouter(prefix="/api/ideas", tags=["ideas"])
@@ -19,21 +19,23 @@ def submit_idea(idea: IdeaRequest) -> dict:
 
     idea_id = idea_resp.json()["id"]
 
-    task_resp = requests.post(
-        f"{settings.pocketbase_url}/api/collections/tasks/records",
-        json={"idea_id": idea_id, "status": "pending", "task_type": "openai_validation"}
-    )
-    if not task_resp.ok:
-        raise HTTPException(status_code=500, detail="Failed to create task in PocketBase")
+    task_ids: dict[str, str] = {}
+    for task_type in ANALYSIS_HANDLERS:
+        task_resp = requests.post(
+            f"{settings.pocketbase_url}/api/collections/tasks/records",
+            json={"idea_id": idea_id, "status": "pending", "task_type": task_type}
+        )
+        if not task_resp.ok:
+            raise HTTPException(status_code=500, detail="Failed to create task in PocketBase")
 
-    task_id = task_resp.json()["id"]
-
-    process_idea_task.delay(task_id, idea.description)
+        task_id = task_resp.json()["id"]
+        task_ids[task_type] = task_id
+        process_idea_task.delay(task_id, idea.description, task_type)
 
     return {
         "message": "Processing started",
         "idea_id": idea_id,
-        "task_id": task_id
+        "task_ids": task_ids
     }
 
 

@@ -15,6 +15,8 @@ settings = Settings()
 
 
 class IdeaRequest(BaseModel):
-    title: str
-    description: str
     user_id: str
+    description: str
+    problem: str = ""
+    customer: str = ""
+    founder_specific: str = ""

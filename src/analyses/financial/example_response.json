@@ -1,0 +1,7 @@
+{
+    "start_capital_needed": "100000 USD",
+    "costs_overview": "this text includes costs overview, such as development costs, marketing costs, etc.",
+    "investor_requirements": "this text includes investor requirements - do you need an investor? what type of investor is ideal for you? what are the risks?",
+    "investor_concerns": "this text includes investor concerns - what are the concerns of the investor? what are the risks?",
+    "overview": "overview - what are the financials of the project? what are the risks and problems?"
+}

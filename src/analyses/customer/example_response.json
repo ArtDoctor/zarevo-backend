@@ -1,0 +1,51 @@
+{
+    "overview": "who is the customer? is it b2b, b2c, b2g, or combined? what difference does it make?",
+    "key_pain_points": [
+        "this text includes key pain points of the customer, such as high prices, lack of features, etc.",
+        "this text includes key pain points of the customer, such as high prices, lack of features, etc."
+    ],
+    "ideal_customers": [
+        {
+            "name": "John doe",
+            "age": 30,
+            "gender": "male",
+            "ready_to_pay_usd": 100,
+            "description": "John doe is a 30 year old male who is ready to pay 100 USD for your hot dogs if they have mustard."
+        },
+        {
+            "name": "Jane Doe",
+            "age": 25,
+            "gender": "female",
+            "ready_to_pay_usd": 67,
+            "description": "Jane doe is a 25 year old female who is ready to pay 67 USD max because she is on a budget but loves hot dogs."
+        }
+    ],
+    "viable_segments": [
+        {
+            "segment_name": "segment 1",
+            "description": "this text includes description of the segment, such as size, growth, etc.",
+            "willingness_and_ability_to_pay": "this explains how much this segment can pay, and how willing they are to pay for the product",
+            "preferred_payment_type": "crypto"
+        },
+        {
+            "segment_name": "segment 2",
+            "description": "this text includes description of the segment, such as size, growth, etc.",
+            "willingness_and_ability_to_pay": "this explains how much this segment can pay, and how willing they are to pay for the product",
+            "preferred_payment_type": "subscription, credit card"
+        }
+    ],
+    "messages_that_resonate": [
+        "this text includes messages that resonates with the customer, such as 'we are the best in the market', 'we are the most affordable', 'we are the most convenient', etc.",
+        "this text includes messages that resonates with the customer, such as 'we are the best in the market', 'we are the most affordable', 'we are the most convenient', etc."
+    ],
+    "customer_habbits": "customer habbits - what are some industry standards that your icp is used to",
+    "strengths": [
+        "this text includes strengths of the customer, such as growth, big sizes, etc.",
+        "this text includes strengths of the customer, such as growth, big sizes, etc."
+    ],
+    "weaknesses": [
+        "this text includes weaknesses of the customer, such as small sizes, declines, etc.",
+        "this text includes weaknesses of the customer, such as small sizes, declines, etc."
+    ],
+    "score": 80
+}

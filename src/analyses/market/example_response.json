@@ -1,0 +1,39 @@
+{
+    "overview": "this text includes market name, market maturity, demographics",
+    "trends_analysis": "this text includes trends in the market, such as growth, decline, etc.",
+    "markets": [
+        {
+            "name": "market 1",
+            "growth_rate": "10%",
+            "sizes_2023_2026_in_millions": [100000, 110000, 120000, 130000]
+        },
+        {
+            "name": "market 2",
+            "growth_rate": "5%",
+            "sizes_2023_2026_in_millions": [50000, 55000, 60000, 65000]
+        },
+        {
+            "name": "market 3",
+            "growth_rate": "0%",
+            "sizes_2023_2026_in_millions": [20000, 21000, 19000, 20000]
+        }
+    ],
+    "strengths": [
+        "this text includes strengths of the market, such growth, big sizes, etc.",
+        "this text includes strengths of the market, such growth, big sizes, etc."
+    ],
+    "weaknesses": [
+        "this text includes weaknesses of the market, such small sizes, declines, etc.",
+        "this text includes weaknesses of the market, such small sizes, declines, etc."
+    ],
+    "gaps_and_opportunities": [
+        "this text includes opportunities of the market, such as untapped niches, etc.",
+        "this text includes opportunities of the market, such as untapped niches, etc."
+    ],
+    "threats": [
+        "this text includes threats of the market, such as declining sizes, etc."
+    ],
+    "new_market_potential": "is there a chance u came up with a product that can create a new market? a 0 to 1 solution? are u solving a problem people don't yet know they have? if yes, we should probably tell u about it.",
+    "why_now": "this text includes why now, why this idea is relevant now.",
+    "score": 80
+}
