@@ -30,7 +30,7 @@ class CustomerAnalysis(BaseModel):
     score: int
 
 
-def get_customer_analysis() -> CustomerAnalysis:
+def get_customer_analysis(idea: dict) -> CustomerAnalysis:
     path = Path(__file__).parent / "example_response.json"
     content = path.read_text()
     return CustomerAnalysis.model_validate_json(content)

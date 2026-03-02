@@ -30,7 +30,7 @@ celery_app = Celery(
 )
 
 
-ANALYSIS_HANDLERS: dict[str, Callable[[], BaseModel]] = {
+ANALYSIS_HANDLERS: dict[str, Callable[[dict], BaseModel]] = {
     "legal": get_legal_analysis,
     "technical": get_technical_analysis,
     "financial": get_financial_analysis,
@@ -92,7 +92,7 @@ def process_idea_task(
         if handler is None:
             raise ValueError(f"Unknown task_type: {task_type}")
 
-        result = handler()
+        result = handler(idea)
 
         _update_task_status(pb_client, analysis_id, Status.DONE, result.model_dump())
 

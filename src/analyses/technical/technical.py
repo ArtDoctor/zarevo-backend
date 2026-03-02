@@ -15,7 +15,7 @@ class TechnicalAnalysis(BaseModel):
     score: int
 
 
-def get_technical_analysis() -> TechnicalAnalysis:
+def get_technical_analysis(idea: dict) -> TechnicalAnalysis:
     path = Path(__file__).parent / "example_response.json"
     content = path.read_text()
     return TechnicalAnalysis.model_validate_json(content)

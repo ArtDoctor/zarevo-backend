@@ -16,7 +16,7 @@ class ProblemAnalysis(BaseModel):
     score: int
 
 
-def get_problem_analysis() -> ProblemAnalysis:
+def get_problem_analysis(idea: dict) -> ProblemAnalysis:
     path = Path(__file__).parent / "example_response.json"
     content = path.read_text()
     return ProblemAnalysis.model_validate_json(content)

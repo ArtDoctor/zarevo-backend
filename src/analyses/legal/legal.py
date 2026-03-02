@@ -10,7 +10,7 @@ class LegalAnalysis(BaseModel):
     score: int
 
 
-def get_legal_analysis() -> LegalAnalysis:
+def get_legal_analysis(idea: dict) -> LegalAnalysis:
     path = Path(__file__).parent / "example_response.json"
     content = path.read_text()
     return LegalAnalysis.model_validate_json(content)

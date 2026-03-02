@@ -11,7 +11,7 @@ class FinancialAnalysis(BaseModel):
     overview: str
 
 
-def get_financial_analysis() -> FinancialAnalysis:
+def get_financial_analysis(idea: dict) -> FinancialAnalysis:
     path = Path(__file__).parent / "example_response.json"
     content = path.read_text()
     return FinancialAnalysis.model_validate_json(content)
