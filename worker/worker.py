@@ -7,7 +7,7 @@ from pocketbase.errors import ClientResponseError
 
 from enum import Enum
 from src.config import settings
-from src.pocketbase_client import get_client
+from src.pocketbase_client import PocketBaseClient
 from src.analyses.legal.legal import get_legal_analysis
 from src.analyses.technical.technical import get_technical_analysis
 from src.analyses.financial.financial import get_financial_analysis
@@ -48,21 +48,43 @@ class Status(str, Enum):
     ERROR = "error"
 
 
-def _update_task_status(task_id: str, status: Status, result: dict | None = None) -> None:
-    client = get_client()
+def _get_pocketbase_client(pocketbase_token: str | None) -> PocketBaseClient | None:
+    if not pocketbase_token:
+        return None
+    pb_client = PocketBaseClient()
+    if not pb_client.authenticate_with_token(pocketbase_token):
+        return None
+    return pb_client
+
+
+def _update_task_status(
+    pb_client: PocketBaseClient | None,
+    task_id: str,
+    status: Status,
+    result: dict | None = None,
+) -> None:
+    if pb_client is None:
+        print("Cannot update task status: no PocketBase client")
+        return
     body: dict[str, str | dict] = {"status": status.value}
     if result is not None:
         body["result"] = result
 
     try:
-        client.collection("analyses").update(task_id, body)
+        pb_client.client.collection("analyses").update(task_id, body)
     except ClientResponseError as e:
         print(f"Error updating task status: {e}")
 
 
 @celery_app.task
-def process_idea_task(analysis_id: str, idea: dict, task_type: str = "market"):
-    _update_task_status(analysis_id, Status.IN_PROGRESS)
+def process_idea_task(
+    analysis_id: str,
+    idea: dict,
+    task_type: str = "market",
+    pocketbase_token: str | None = None,
+) -> None:
+    pb_client = _get_pocketbase_client(pocketbase_token)
+    _update_task_status(pb_client, analysis_id, Status.IN_PROGRESS)
 
     try:
         IdeaRequest.model_validate(idea)
@@ -72,11 +94,13 @@ def process_idea_task(analysis_id: str, idea: dict, task_type: str = "market"):
 
         result = handler()
 
-        _update_task_status(analysis_id, Status.DONE, result.model_dump())
+        _update_task_status(pb_client, analysis_id, Status.DONE, result.model_dump())
 
     except Exception as e:
         print(f"Error processing task: {e}")
-        _update_task_status(analysis_id, Status.ERROR, TaskError(error=str(e)).model_dump())
+        _update_task_status(
+            pb_client, analysis_id, Status.ERROR, TaskError(error=str(e)).model_dump()
+        )
 
 
 def _generate_title_prompt(description: str) -> str:
@@ -90,10 +114,15 @@ def _generate_title_prompt(description: str) -> str:
 
 
 @celery_app.task
-def process_title_task(idea_id: str, description: str) -> None:
-    client = get_client()
+def process_title_task(
+    idea_id: str,
+    description: str,
+    pocketbase_token: str | None = None,
+) -> None:
     try:
         title = get_vertex_response(_generate_title_prompt(description))
-        client.collection("ideas").update(idea_id, {"title": title})
+        pb_client = _get_pocketbase_client(pocketbase_token)
+        if pb_client is not None:
+            pb_client.client.collection("ideas").update(idea_id, {"title": title})
     except Exception as e:
         print(f"Error generating title: {e}")

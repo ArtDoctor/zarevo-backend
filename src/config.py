@@ -18,7 +18,6 @@ settings = Settings()
 
 
 class IdeaRequest(BaseModel):
-    user_id: str
     description: str
     problem: str = ""
     customer: str = ""
