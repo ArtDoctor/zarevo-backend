@@ -1,0 +1,6 @@
+services:
+  zarevo-backend:
+    build: .
+    env_file:
+      - .env
+    restart: always
