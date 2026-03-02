@@ -1,5 +1,5 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-from utils.ai_utils import SmartnessLevel
+from src.ai_utils.ai_utils import SmartnessLevel
 from src.config import settings
 
 

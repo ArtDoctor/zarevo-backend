@@ -10,7 +10,7 @@ set +a
 source venv/bin/activate
 
 echo "Starting Celery worker in the background..."
-celery -A worker.worker worker --loglevel=info &
+celery -A worker.worker -q worker --loglevel=info &
 CELERY_PID=$!
 
 echo "Starting FastAPI server..."

@@ -1,55 +1,42 @@
-from fastapi import APIRouter, HTTPException
-import requests
+from fastapi import APIRouter
 
-from src.config import settings, IdeaRequest
-from worker.worker import ANALYSIS_HANDLERS, process_idea_task
+from src.config import IdeaRequest
+from src.pocketbase_client import get_client
+from worker.worker import ANALYSIS_HANDLERS, process_idea_task, process_title_task, Status
 
 
 router = APIRouter(prefix="/api/ideas", tags=["ideas"])
 
 
-@router.post("")
+@router.post("/new")
 def submit_idea(idea: IdeaRequest) -> dict:
-    idea_resp = requests.post(
-        f"{settings.pocketbase_url}/api/collections/ideas/records",
-        json={"title": idea.title, "description": idea.description, "user": idea.user_id}
-    )
-    if not idea_resp.ok:
-        raise HTTPException(status_code=500, detail="Failed to create idea in PocketBase")
+    client = get_client()
 
-    idea_id = idea_resp.json()["id"]
-
-    task_ids: dict[str, str] = {}
+    task_ids = []
     for task_type in ANALYSIS_HANDLERS:
-        task_resp = requests.post(
-            f"{settings.pocketbase_url}/api/collections/tasks/records",
-            json={"idea_id": idea_id, "status": "pending", "task_type": task_type}
+        task_record = client.collection("analyses").create(
+            {"status": Status.PENDING.value, "type": task_type}
         )
-        if not task_resp.ok:
-            raise HTTPException(status_code=500, detail="Failed to create task in PocketBase")
 
-        task_id = task_resp.json()["id"]
-        task_ids[task_type] = task_id
-        process_idea_task.delay(task_id, idea.description, task_type)
+        task_id = task_record.id
+        task_ids.append(task_id)
+        process_idea_task.delay(task_id, idea.model_dump(), task_type)
+
+    idea_record = client.collection("ideas").create(
+        {
+            "description": idea.description,
+            "author": idea.user_id,
+            "title": "",
+            "problem": idea.problem,
+            "customer": idea.customer,
+            "founder_specific": idea.founder_specific,
+            "analyses": task_ids
+        }
+    )
+
+    process_title_task.delay(idea_record.id, idea.description)
 
     return {
         "message": "Processing started",
-        "idea_id": idea_id,
-        "task_ids": task_ids
-    }
-
-
-@router.get("/{task_id}/result")
-def check_result(task_id: str) -> dict:
-    resp = requests.get(
-        f"{settings.pocketbase_url}/api/collections/tasks/records/{task_id}"
-    )
-    if not resp.ok:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    data = resp.json()
-    return {
-        "task_id": task_id,
-        "status": data.get("status"),
-        "result": data.get("result")
+        "idea_id": idea_record.id,
     }

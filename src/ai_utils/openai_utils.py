@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from utils.ai_utils import SmartnessLevel
+from src.ai_utils.ai_utils import SmartnessLevel
 from src.config import settings
 
 

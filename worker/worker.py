@@ -1,9 +1,13 @@
 from celery import Celery
 from collections.abc import Callable
-import requests
+
 from pydantic import BaseModel
 
+from pocketbase.errors import ClientResponseError
+
+from enum import Enum
 from src.config import settings
+from src.pocketbase_client import get_client
 from src.analyses.legal.legal import get_legal_analysis
 from src.analyses.technical.technical import get_technical_analysis
 from src.analyses.financial.financial import get_financial_analysis
@@ -11,6 +15,8 @@ from src.analyses.competitor.competitor import get_competitor_analysis
 from src.analyses.customer.customer import get_customer_analysis
 from src.analyses.problem.problem import get_problem_analysis
 from src.analyses.market.market import get_market_analysis
+from src.ai_utils.vertex_utils import get_vertex_response
+from src.config import IdeaRequest
 
 
 class TaskError(BaseModel):
@@ -35,26 +41,59 @@ ANALYSIS_HANDLERS: dict[str, Callable[[], BaseModel]] = {
 }
 
 
-@celery_app.task
-def process_idea_task(task_id: str, idea_description: str, task_type: str = "market"):
-    pb_task_url = f"{settings.pocketbase_url}/api/collections/tasks/records/{task_id}"
+class Status(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+    ERROR = "error"
 
-    requests.patch(pb_task_url, json={"status": "processing"})
+
+def _update_task_status(task_id: str, status: Status, result: dict | None = None) -> None:
+    client = get_client()
+    body: dict[str, str | dict] = {"status": status.value}
+    if result is not None:
+        body["result"] = result
 
     try:
+        client.collection("analyses").update(task_id, body)
+    except ClientResponseError as e:
+        print(f"Error updating task status: {e}")
+
+
+@celery_app.task
+def process_idea_task(analysis_id: str, idea: dict, task_type: str = "market"):
+    _update_task_status(analysis_id, Status.IN_PROGRESS)
+
+    try:
+        IdeaRequest.model_validate(idea)
         handler = ANALYSIS_HANDLERS.get(task_type)
         if handler is None:
             raise ValueError(f"Unknown task_type: {task_type}")
 
         result = handler()
 
-        requests.patch(pb_task_url, json={
-            "status": "completed",
-            "result": result.model_dump()
-        })
+        _update_task_status(analysis_id, Status.DONE, result.model_dump())
 
     except Exception as e:
-        requests.patch(pb_task_url, json={
-            "status": "failed",
-            "result": TaskError(error=str(e)).model_dump()
-        })
+        print(f"Error processing task: {e}")
+        _update_task_status(analysis_id, Status.ERROR, TaskError(error=str(e)).model_dump())
+
+
+def _generate_title_prompt(description: str) -> str:
+    return (
+        f"""Generate a short one-line title for this idea description:
+        <description>
+        {description}
+        </description>
+        Return only the title, no other text."""
+    )
+
+
+@celery_app.task
+def process_title_task(idea_id: str, description: str) -> None:
+    client = get_client()
+    try:
+        title = get_vertex_response(_generate_title_prompt(description))
+        client.collection("ideas").update(idea_id, {"title": title})
+    except Exception as e:
+        print(f"Error generating title: {e}")
