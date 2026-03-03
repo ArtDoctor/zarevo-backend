@@ -12,8 +12,20 @@ content-type: application/json
 }
 
 
-### new idea
+### new idea (basic: market, customer, problem only)
 POST http://localhost:26769/api/ideas/new
+content-type: application/json
+
+{
+    "user_id": "lpkpvtsynueh2vn",
+    "description": "A test description",
+    "problem": "A test problem",
+    "customer": "A test customer",
+    "founder_specific": "A test founder specific"
+}
+
+### new idea advanced (all analyses)
+POST http://localhost:26769/api/ideas/new/advanced
 content-type: application/json
 
 {

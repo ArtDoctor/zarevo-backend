@@ -40,6 +40,9 @@ ANALYSIS_HANDLERS: dict[str, Callable[[dict], BaseModel]] = {
     "market": get_market_analysis,
 }
 
+BASIC_ANALYSIS_TYPES: tuple[str, ...] = ("market", "customer", "problem")
+ADVANCED_ANALYSIS_TYPES: tuple[str, ...] = tuple(ANALYSIS_HANDLERS.keys())
+
 ANALYSIS_EXAMPLE_LOADERS: dict[str, Callable[[], BaseModel]] = {
     "legal": get_example_legal_analysis,
     "technical": get_example_technical_analysis,

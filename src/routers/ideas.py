@@ -2,16 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.config import IdeaRequest
 from src.pocketbase_client import PocketBaseClient, verify_pocketbase_token
-from worker.worker import ANALYSIS_HANDLERS, process_idea_task, process_title_task, Status
+from worker.worker import (
+    ADVANCED_ANALYSIS_TYPES,
+    BASIC_ANALYSIS_TYPES,
+    process_idea_task,
+    process_title_task,
+    Status,
+)
 
 
 router = APIRouter(prefix="/api/ideas", tags=["ideas"])
 
 
-@router.post("/new")
-def submit_idea(
+def _submit_idea_with_analyses(
     idea: IdeaRequest,
-    pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
+    pb_client: PocketBaseClient,
+    task_types: tuple[str, ...],
 ) -> dict:
     user_id = pb_client.get_current_user_id()
     if not user_id:
@@ -22,7 +28,7 @@ def submit_idea(
     task_ids: list[str] = []
     auth_token = pb_client.get_auth_token()
     try:
-        for task_type in ANALYSIS_HANDLERS:
+        for task_type in task_types:
             task_record = client.collection("analyses").create(
                 {"status": Status.PENDING.value, "type": task_type}
             )
@@ -56,3 +62,19 @@ def submit_idea(
         "message": "Processing started",
         "idea_id": idea_record.id,
     }
+
+
+@router.post("/new")
+def submit_idea(
+    idea: IdeaRequest,
+    pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
+) -> dict:
+    return _submit_idea_with_analyses(idea, pb_client, BASIC_ANALYSIS_TYPES)
+
+
+@router.post("/new/advanced")
+def submit_idea_advanced(
+    idea: IdeaRequest,
+    pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
+) -> dict:
+    return _submit_idea_with_analyses(idea, pb_client, ADVANCED_ANALYSIS_TYPES)
