@@ -13,3 +13,5 @@ When implementing functionality:
 4. **Validate**: Confirm new tests actually exercise the intended code paths.
 
 Skip TDD when it would add disproportionate overhead (e.g., trivial one-liners, urgent hotfixes).
+
+To run tests, use bash run_tests.sh. If you need to use python directly, use venv/bin/activate first.

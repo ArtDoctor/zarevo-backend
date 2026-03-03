@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.config import IdeaRequest
 from src.pocketbase_client import PocketBaseClient, verify_pocketbase_token
@@ -13,15 +13,26 @@ from worker.worker import (
 
 router = APIRouter(prefix="/api/ideas", tags=["ideas"])
 
+BASIC_ANALYSIS_CREDITS = 1
+ADVANCED_ANALYSIS_CREDITS = 4
+
 
 def _submit_idea_with_analyses(
     idea: IdeaRequest,
     pb_client: PocketBaseClient,
     task_types: tuple[str, ...],
+    credit_cost: int,
 ) -> dict:
     user_id = pb_client.get_current_user_id()
     if not user_id:
         raise HTTPException(status_code=401, detail="User not authenticated")
+
+    credits = pb_client.get_user_credits(user_id)
+    if credits < credit_cost:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=f"Insufficient credits. Required: {credit_cost}, available: {credits}",
+        )
 
     client = pb_client.client
 
@@ -56,6 +67,7 @@ def _submit_idea_with_analyses(
                 pass
         raise
 
+    pb_client.deduct_user_credits(user_id, credit_cost)
     process_title_task.delay(idea_record.id, idea.description, auth_token)
 
     return {
@@ -69,7 +81,9 @@ def submit_idea(
     idea: IdeaRequest,
     pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
 ) -> dict:
-    return _submit_idea_with_analyses(idea, pb_client, BASIC_ANALYSIS_TYPES)
+    return _submit_idea_with_analyses(
+        idea, pb_client, BASIC_ANALYSIS_TYPES, BASIC_ANALYSIS_CREDITS
+    )
 
 
 @router.post("/new/advanced")
@@ -77,4 +91,6 @@ def submit_idea_advanced(
     idea: IdeaRequest,
     pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
 ) -> dict:
-    return _submit_idea_with_analyses(idea, pb_client, ADVANCED_ANALYSIS_TYPES)
+    return _submit_idea_with_analyses(
+        idea, pb_client, ADVANCED_ANALYSIS_TYPES, ADVANCED_ANALYSIS_CREDITS
+    )

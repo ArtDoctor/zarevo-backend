@@ -63,7 +63,7 @@ class Status(str, Enum):
 
 def _get_pocketbase_client(pocketbase_token: str | None) -> PocketBaseClient | None:
     if not pocketbase_token:
-        return None
+        return PocketBaseClient.for_admin()
     pb_client = PocketBaseClient()
     if not pb_client.authenticate_with_token(pocketbase_token):
         return None
