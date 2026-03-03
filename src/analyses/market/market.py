@@ -88,6 +88,11 @@ def _search_markets(description: str, top_k: int = 5) -> list[MarketEntry]:
     return entries
 
 
+def get_example_market_analysis() -> MarketAnalysis:
+    path = Path(__file__).parent / "example_response.json"
+    return MarketAnalysis.model_validate_json(path.read_text())
+
+
 def get_market_analysis(idea: dict) -> MarketAnalysis:
     from src.config import IdeaRequest
 

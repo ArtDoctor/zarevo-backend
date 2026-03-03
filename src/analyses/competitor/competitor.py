@@ -19,7 +19,10 @@ class CompetitorAnalysis(BaseModel):
     score: int
 
 
-def get_competitor_analysis(idea: dict) -> CompetitorAnalysis:
+def get_example_competitor_analysis() -> CompetitorAnalysis:
     path = Path(__file__).parent / "example_response.json"
-    content = path.read_text()
-    return CompetitorAnalysis.model_validate_json(content)
+    return CompetitorAnalysis.model_validate_json(path.read_text())
+
+
+def get_competitor_analysis(idea: dict) -> CompetitorAnalysis:
+    return get_example_competitor_analysis()

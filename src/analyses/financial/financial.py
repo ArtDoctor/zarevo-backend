@@ -11,7 +11,10 @@ class FinancialAnalysis(BaseModel):
     overview: str
 
 
-def get_financial_analysis(idea: dict) -> FinancialAnalysis:
+def get_example_financial_analysis() -> FinancialAnalysis:
     path = Path(__file__).parent / "example_response.json"
-    content = path.read_text()
-    return FinancialAnalysis.model_validate_json(content)
+    return FinancialAnalysis.model_validate_json(path.read_text())
+
+
+def get_financial_analysis(idea: dict) -> FinancialAnalysis:
+    return get_example_financial_analysis()

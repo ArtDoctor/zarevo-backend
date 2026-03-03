@@ -4,20 +4,25 @@
     "markets": [
         {
             "name": "market 1",
+            "sector": "Technology",
             "growth_rate": "10%",
             "sizes_2023_2026_in_millions": [100000, 110000, 120000, 130000]
         },
         {
             "name": "market 2",
+            "sector": "Healthcare",
             "growth_rate": "5%",
             "sizes_2023_2026_in_millions": [50000, 55000, 60000, 65000]
         },
         {
             "name": "market 3",
+            "sector": "Finance",
             "growth_rate": "0%",
             "sizes_2023_2026_in_millions": [20000, 21000, 19000, 20000]
         }
     ],
+    "sectors": ["Technology", "Healthcare", "Finance"],
+    "average_growth_rate": "5%",
     "strengths": [
         "this text includes strengths of the market, such growth, big sizes, etc.",
         "this text includes strengths of the market, such growth, big sizes, etc."
