@@ -138,7 +138,11 @@ def process_title_task(
     pocketbase_token: str | None = None,
 ) -> None:
     try:
-        title = "Example Idea Title" if description == "test" else get_vertex_response(_generate_title_prompt(description))
+        title = (
+            "Example Idea Title"
+            if description == "test"
+            else get_vertex_response(_generate_title_prompt(description)).text
+        )
         pb_client = _get_pocketbase_client(pocketbase_token)
         if pb_client is not None:
             pb_client.client.collection("ideas").update(idea_id, {"title": title})

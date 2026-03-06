@@ -1,4 +1,7 @@
+import json
 import secrets
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,6 +18,8 @@ _security = HTTPBasic()
 # Hard-coded basic auth credentials for admin/debug usage.
 _ADMIN_USERNAME = "admin"
 _ADMIN_PASSWORD = "admin"
+
+_MIN_DESCRIPTION_LENGTH = 10
 
 
 class AdminGetAnalysisRequest(IdeaRequest):
@@ -34,6 +39,16 @@ def _require_admin_basic_auth(
         detail="Invalid basic auth credentials",
         headers={"WWW-Authenticate": "Basic"},
     )
+
+
+def _save_analysis(analysis_type: str, request: dict[str, Any], result: dict[str, Any]) -> None:
+    analyses_dir = Path("analyses_admin")
+    analyses_dir.mkdir(exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}_{analysis_type}.json"
+    path = analyses_dir / filename
+    payload = {"request": request, "result": result}
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 @router.post("/analysis")
@@ -58,7 +73,18 @@ def admin_get_analysis(
             )
         result = loader()
     else:
+        if len(request.description.strip()) < _MIN_DESCRIPTION_LENGTH:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Description must be at least {_MIN_DESCRIPTION_LENGTH} characters",
+            )
         result = handler(request.model_dump(exclude={"analysis_type"}))
 
-    return {"type": analysis_type, "result": result.model_dump()}
+    result_dict = result.model_dump()
+    response = {"type": analysis_type, "result": result_dict}
 
+    request_dict = request.model_dump()
+    if request.description.strip().lower() != "test":
+        _save_analysis(analysis_type, request_dict, result_dict)
+
+    return response

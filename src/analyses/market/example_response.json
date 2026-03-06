@@ -1,6 +1,8 @@
 {
     "overview": "this text includes market name, market maturity, demographics",
     "trends_analysis": "this text includes trends in the market, such as growth, decline, etc.",
+    "sources": ["example.com/report1", "example.com/report2"],
+    "theoretical_market_share_pct": "1-3%",
     "markets": [
         {
             "name": "market 1",

@@ -61,3 +61,21 @@ def test_admin_get_analysis_unknown_type_returns_404() -> None:
     )
     assert res.status_code == 404
 
+
+def test_admin_get_analysis_rejects_short_description() -> None:
+    client = TestClient(app)
+    res = client.post(
+        "/api/admin/analysis",
+        json={
+            "analysis_type": "market",
+            "description": "ab",
+            "problem": "",
+            "customer": "",
+            "geography": "",
+            "founder_specific": "",
+        },
+        headers=_basic_auth_header("admin", "admin"),
+    )
+    assert res.status_code == 400
+    assert "at least" in res.json()["detail"].lower()
+

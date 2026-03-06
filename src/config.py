@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     pocketbase_user: str
     pocketbase_password: str
 
+    langsmith_tracing: bool
+    langsmith_endpoint: str
+    langsmith_api_key: str
+    langsmith_project: str
+
 
 settings = Settings()
 
