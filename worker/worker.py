@@ -29,6 +29,13 @@ celery_app = Celery(
     backend=settings.redis_url
 )
 
+_redis_transport_opts = {
+    "socket_keepalive": True,
+    "health_check_interval": 30,
+}
+celery_app.conf.broker_transport_options = _redis_transport_opts
+celery_app.conf.result_backend_transport_options = _redis_transport_opts
+
 
 ANALYSIS_HANDLERS: dict[str, Callable[[dict], BaseModel]] = {
     "legal": get_legal_analysis,
