@@ -1,5 +1,7 @@
 import json
+import random
 import secrets
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -72,6 +74,7 @@ def admin_get_analysis(
                 detail=f"Unknown analysis type: {analysis_type}",
             )
         result = loader()
+        time.sleep(random.uniform(1, 3))
     else:
         if len(request.description.strip()) < _MIN_DESCRIPTION_LENGTH:
             raise HTTPException(

@@ -1,3 +1,4 @@
+import logging
 import uuid
 from pathlib import Path
 
@@ -23,6 +24,8 @@ from src.analyses.competitor.prompts import (
 )
 from src.analyses.problem.prompts import idea_context_for_prompt
 from src.config import IdeaRequest
+
+_log = logging.getLogger(__name__)
 
 
 def get_example_competitor_analysis() -> CompetitorAnalysis:
@@ -52,23 +55,27 @@ def _run_competitor_analysis(
     competitors: list[CompetitorEntry] = []
     discovery_links: list[str] = []
 
-    try:
-        discovery_prompt = competitor_discovery_prompt(idea_context)
-        discovery_result = get_vertex_structured(
-            discovery_prompt,
-            CompetitorDiscoveryResponse,
-            smartness=SmartnessLevel.MEDIUM,
-            use_internet=True,
-            config=run_config,
-        )
-        if isinstance(discovery_result, tuple):
-            discovery, discovery_links = discovery_result
-        else:
-            discovery = discovery_result
-        if isinstance(discovery, CompetitorDiscoveryResponse):
-            competitors = discovery.competitors
-    except Exception:
-        competitors = []
+    discovery_prompt = competitor_discovery_prompt(idea_context)
+    for attempt in range(2):
+        try:
+            discovery_result = get_vertex_structured(
+                discovery_prompt,
+                CompetitorDiscoveryResponse,
+                smartness=SmartnessLevel.MEDIUM,
+                use_internet=True,
+                config=run_config,
+            )
+            if isinstance(discovery_result, tuple):
+                discovery, discovery_links = discovery_result
+            else:
+                discovery = discovery_result
+            if isinstance(discovery, CompetitorDiscoveryResponse):
+                competitors = discovery.competitors
+            break
+        except Exception:
+            _log.exception(
+                "Competitor discovery failed (attempt %d/2)", attempt + 1
+            )
 
     if not competitors:
         return CompetitorAnalysis(

@@ -1,3 +1,6 @@
+import random
+import time
+
 from celery import Celery
 from collections.abc import Callable
 
@@ -113,6 +116,7 @@ def process_idea_task(
             if loader is None:
                 raise ValueError(f"Unknown task_type: {task_type}")
             result = loader()
+            time.sleep(random.uniform(1, 3))
         else:
             handler = ANALYSIS_HANDLERS.get(task_type)
             if handler is None:
