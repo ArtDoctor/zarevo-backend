@@ -35,3 +35,32 @@ content-type: application/json
     "customer": "A test customer",
     "founder_specific": "A test founder specific"
 }
+
+
+### admin: get a specific analysis (basic auth)
+POST http://localhost:26769/api/admin/analysis
+content-type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+    "analysis_type": "market",
+    "description": "Validating business ideas using AI, then letting user run a smoke test (while managing ads/traffic for them) and generate final report; take away all the complexity from the user, make it easy to validate many ideas quickly and efficiently; data-driven approach, web scraping.",
+    "problem": "Validating business ideas using AI",
+    "customer": "Indie hackers, serial entrepreneurs, idea managers",
+    "geography": "Global",
+    "founder_specific": "An AI-experienced founder"
+}
+
+### admin: get a specific analysis (basic auth) test
+POST http://localhost:26769/api/admin/analysis
+content-type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+    "analysis_type": "market",
+    "description": "test",
+    "problem": "p",
+    "customer": "c",
+    "geography": "g",
+    "founder_specific": "f"
+}

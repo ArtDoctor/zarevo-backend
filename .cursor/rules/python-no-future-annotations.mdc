@@ -1,0 +1,10 @@
+---
+description: Never use future annotations import
+globs: **/*.py
+alwaysApply: true
+---
+
+Never use `from __future__ import annotations`.
+
+If you see it in an existing file, remove it instead of adding or keeping it.
+
