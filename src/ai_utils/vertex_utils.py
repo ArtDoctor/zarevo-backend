@@ -169,7 +169,7 @@ def _extract_json_from_text(text: str) -> str:
     start = text.find("{")
     end = text.rfind("}")
     if start >= 0 and end > start:
-        return text[start : end + 1]
+        return text[start:end + 1]
     return text
 
 
