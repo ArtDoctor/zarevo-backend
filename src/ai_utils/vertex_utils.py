@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable
 from urllib.parse import urlparse
 
 import httpx
@@ -141,11 +141,12 @@ def get_vertex_response(
     prompt: str,
     smartness: SmartnessLevel = SmartnessLevel.LOW,
     use_internet: bool = False,
+    config: dict[str, Any] | None = None,
 ) -> VertexResponse:
     model = _get_vertex_model(smartness)
     if use_internet:
         model = model.bind_tools([{"google_search": {}}])
-    message = model.invoke(prompt)
+    message = model.invoke(prompt, config=config or {})
     content = message.content
 
     response_metadata: object = {}
@@ -159,7 +160,10 @@ def get_vertex_response(
 
 
 def get_vertex_structured(
-    prompt: str, response_model: type[BaseModel], smartness: SmartnessLevel = SmartnessLevel.LOW
+    prompt: str,
+    response_model: type[BaseModel],
+    smartness: SmartnessLevel = SmartnessLevel.LOW,
+    config: dict[str, Any] | None = None,
 ) -> BaseModel:
     """
     Returns a Pydantic model using LangChain structured output parsing.
@@ -167,8 +171,7 @@ def get_vertex_structured(
     model = _get_vertex_model(smartness)
 
     structured_model = model.with_structured_output(response_model)
-    result = structured_model.invoke(prompt)
+    result = structured_model.invoke(prompt, config=config or {})
     if isinstance(result, response_model):
         return result
     return response_model.model_validate(result)
-

@@ -3,6 +3,8 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
+from src.main import app
+
 
 def pytest_configure(config: pytest.Config) -> None:
     os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
@@ -13,5 +15,4 @@ def pytest_configure(config: pytest.Config) -> None:
 
 @pytest.fixture
 def client() -> TestClient:
-    from src.main import app
     return TestClient(app)

@@ -1,7 +1,10 @@
+import json
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import chromadb
+import langsmith
 
 from src.ai_utils.ai_utils import SmartnessLevel
 from src.ai_utils.vertex_utils import (
@@ -32,6 +35,7 @@ from src.analyses.market.prompts import (
     market_trends_prompt,
     market_weaknesses_prompt,
 )
+from src.config import IdeaRequest
 
 
 def _growth_rate_from_sizes(sizes: list[int]) -> str:
@@ -63,8 +67,6 @@ def _ensure_industries_indexed(collection: chromadb.Collection) -> list[Industry
 
 
 def _load_json(path: Path) -> list[dict]:
-    import json
-
     return json.loads(path.read_text())
 
 
@@ -117,8 +119,18 @@ def get_example_market_analysis() -> MarketAnalysis:
 
 
 def get_market_analysis(idea: dict) -> MarketAnalysis:
-    from src.config import IdeaRequest
+    thread_id = str(uuid.uuid4())
+    run_config: dict[str, object] = {"metadata": {"thread_id": thread_id}}
 
+    with langsmith.trace(
+        name="Market Analysis",
+        metadata={"thread_id": thread_id},
+        tags=["market-analysis"],
+    ):
+        return _run_market_analysis(idea, run_config)
+
+
+def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAnalysis:
     validated = IdeaRequest.model_validate(idea)
     description = validated.description
     if validated.problem:
@@ -138,7 +150,10 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
             idea_context=idea_context, base_markets=base_markets, max_new=5
         )
         discovery = get_vertex_structured(
-            discovery_prompt, AdditionalMarketCandidatesResponse, smartness=SmartnessLevel.LOW
+            discovery_prompt,
+            AdditionalMarketCandidatesResponse,
+            smartness=SmartnessLevel.LOW,
+            config=run_config,
         )
         if isinstance(discovery, AdditionalMarketCandidatesResponse):
             additional_candidates = discovery.candidates
@@ -152,7 +167,10 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
                 idea_context=idea_context, candidates=additional_candidates
             )
             sizing = get_vertex_structured(
-                sizing_prompt, MarketSizingResponse, smartness=SmartnessLevel.HIGH
+                sizing_prompt,
+                MarketSizingResponse,
+                smartness=SmartnessLevel.HIGH,
+                config=run_config,
             )
             if isinstance(sizing, MarketSizingResponse):
                 additional_sized = sizing.items
@@ -207,6 +225,7 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
                 overview_prompt,
                 smartness=SmartnessLevel.MEDIUM,
                 use_internet=True,
+                config=run_config,
             )
         except Exception:
             return VertexResponse(text="", links=[])
@@ -217,6 +236,7 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
                 trends_prompt,
                 smartness=SmartnessLevel.MEDIUM,
                 use_internet=True,
+                config=run_config,
             )
         except Exception:
             return VertexResponse(text="", links=[])
@@ -255,7 +275,10 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
     def _get_strengths() -> list[str]:
         try:
             r = get_vertex_structured(
-                strengths_prompt, StrengthsResponse, smartness=SmartnessLevel.MEDIUM
+                strengths_prompt,
+                StrengthsResponse,
+                smartness=SmartnessLevel.MEDIUM,
+                config=run_config,
             )
             return r.strengths if isinstance(r, StrengthsResponse) else []
         except Exception:
@@ -264,20 +287,27 @@ def get_market_analysis(idea: dict) -> MarketAnalysis:
     def _get_weaknesses() -> list[str]:
         try:
             r = get_vertex_structured(
-                weaknesses_prompt, WeaknessesResponse, smartness=SmartnessLevel.MEDIUM
+                weaknesses_prompt,
+                WeaknessesResponse,
+                smartness=SmartnessLevel.MEDIUM,
+                config=run_config,
             )
             return r.weaknesses if isinstance(r, WeaknessesResponse) else []
         except Exception:
             return []
 
+    def _get_remaining() -> MarketSynthesisRemaining:
+        return get_vertex_structured(
+            remaining_prompt,
+            MarketSynthesisRemaining,
+            smartness=SmartnessLevel.MEDIUM,
+            config=run_config,
+        )
+
     with ThreadPoolExecutor(max_workers=3) as executor:
         f_strengths = executor.submit(_get_strengths)
         f_weaknesses = executor.submit(_get_weaknesses)
-        f_remaining = executor.submit(
-            lambda: get_vertex_structured(
-                remaining_prompt, MarketSynthesisRemaining, smartness=SmartnessLevel.MEDIUM
-            )
-        )
+        f_remaining = executor.submit(_get_remaining)
         strengths = f_strengths.result()
         weaknesses = f_weaknesses.result()
         try:

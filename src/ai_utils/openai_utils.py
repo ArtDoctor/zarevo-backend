@@ -9,6 +9,6 @@ def get_openai_response(prompt: str, smartness: SmartnessLevel = SmartnessLevel.
     elif smartness == SmartnessLevel.MEDIUM:
         model = ChatOpenAI(model="gpt-5-mini", api_key=settings.openai_api_key)
     elif smartness == SmartnessLevel.HIGH:
-        model = ChatOpenAI(model="gpt-5.2", api_key=settings.openai_api_key)
+        model = ChatOpenAI(model="gpt-5.4", api_key=settings.openai_api_key)
     response = model.invoke(prompt)
     return response.content

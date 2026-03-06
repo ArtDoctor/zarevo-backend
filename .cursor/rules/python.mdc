@@ -5,3 +5,4 @@ alwaysApply: true
 
 When writing code, make sure to have 2 blank lines in between definitions of classes/functions (according to common pip conventions).
 Add another blank line at the end of every file.
+NEVER add imports in the middle of the file. If you need one, you need to reorganize python files.

@@ -1,11 +1,11 @@
+import base64
+
 from fastapi.testclient import TestClient
 
 from src.main import app
 
 
 def _basic_auth_header(username: str, password: str) -> dict[str, str]:
-    import base64
-
     token = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
     return {"Authorization": f"Basic {token}"}
 
