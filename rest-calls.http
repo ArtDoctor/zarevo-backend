@@ -43,7 +43,7 @@ content-type: application/json
 Authorization: Basic YWRtaW46YWRtaW4=
 
 {
-    "analysis_type": "market",
+    "analysis_type": "problem",
     "description": "Validating business ideas using AI, then letting user run a smoke test (while managing ads/traffic for them) and generate final report; take away all the complexity from the user, make it easy to validate many ideas quickly and efficiently; data-driven approach, web scraping.",
     "problem": "Validating business ideas using AI",
     "customer": "Indie hackers, serial entrepreneurs, idea managers",

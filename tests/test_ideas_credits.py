@@ -144,6 +144,60 @@ def test_submit_idea_advanced_deducts_4_credits_after_success(
 
 @patch("src.routers.ideas.process_idea_task")
 @patch("src.routers.ideas.process_title_task")
+def test_submit_idea_does_not_deduct_credits_when_description_is_test(
+    mock_title_task: MagicMock,
+    mock_idea_task: MagicMock,
+    client: TestClient,
+) -> None:
+    deduct_called: list[int] = []
+    mock_pb = _make_mock_pb_client(credits=0, deduct_called=deduct_called)
+    app.dependency_overrides[verify_pocketbase_token] = lambda: mock_pb
+
+    try:
+        response = client.post(
+            "/api/ideas/new",
+            json={
+                "description": "test",
+                "problem": "",
+                "customer": "",
+                "founder_specific": "",
+            },
+        )
+        assert response.status_code == 200
+        assert deduct_called == []
+    finally:
+        app.dependency_overrides.pop(verify_pocketbase_token, None)
+
+
+@patch("src.routers.ideas.process_idea_task")
+@patch("src.routers.ideas.process_title_task")
+def test_submit_idea_advanced_does_not_deduct_credits_when_description_is_test(
+    mock_title_task: MagicMock,
+    mock_idea_task: MagicMock,
+    client: TestClient,
+) -> None:
+    deduct_called: list[int] = []
+    mock_pb = _make_mock_pb_client(credits=0, deduct_called=deduct_called)
+    app.dependency_overrides[verify_pocketbase_token] = lambda: mock_pb
+
+    try:
+        response = client.post(
+            "/api/ideas/new/advanced",
+            json={
+                "description": "test",
+                "problem": "",
+                "customer": "",
+                "founder_specific": "",
+            },
+        )
+        assert response.status_code == 200
+        assert deduct_called == []
+    finally:
+        app.dependency_overrides.pop(verify_pocketbase_token, None)
+
+
+@patch("src.routers.ideas.process_idea_task")
+@patch("src.routers.ideas.process_title_task")
 def test_submit_idea_does_not_deduct_on_create_failure(
     mock_title_task: MagicMock,
     mock_idea_task: MagicMock,

@@ -159,17 +159,39 @@ def get_vertex_response(
     )
 
 
+def _extract_json_from_text(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```"):
+        start = text.find("\n") + 1
+        end = text.rfind("```")
+        if end > start:
+            return text[start:end].strip()
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        return text[start : end + 1]
+    return text
+
+
 def get_vertex_structured(
     prompt: str,
     response_model: type[BaseModel],
     smartness: SmartnessLevel = SmartnessLevel.LOW,
+    use_internet: bool = False,
     config: dict[str, Any] | None = None,
-) -> BaseModel:
-    """
-    Returns a Pydantic model using LangChain structured output parsing.
-    """
+) -> BaseModel | tuple[BaseModel, list[str]]:
     model = _get_vertex_model(smartness)
-
+    if use_internet:
+        model = model.bind_tools([{"google_search": {}}])
+        message = model.invoke(prompt, config=config or {})
+        response_metadata: object = {}
+        if hasattr(message, "response_metadata"):
+            response_metadata = message.response_metadata
+        links = _extract_links(response_metadata)
+        text = _extract_text(message.content)
+        json_str = _extract_json_from_text(text)
+        result = response_model.model_validate_json(json_str)
+        return (result, links)
     structured_model = model.with_structured_output(response_model)
     result = structured_model.invoke(prompt, config=config or {})
     if isinstance(result, response_model):

@@ -1,7 +1,7 @@
 {
     "overview": "overview - are u solving an actual problem? if yes, list the problems this idea solves and formulate one primary problem. if no, reason why this is not an actual problem - decrease the score by a lot",
     "vitamin_or_painkiller": 8,
-    "problem_stateement": "strong and clear problem statement",
+    "problem_statement": "strong and clear problem statement",
     "problem_frequency": 7,
     "problem_size": 8,
     "alternative_solutions": "list of alternative solutions to the problem",

@@ -145,33 +145,45 @@ def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAna
 
     # Step 2: ask Gemini for additional markets (web-grounded).
     additional_candidates: list[AdditionalMarketCandidate] = []
+    discovery_links: list[str] = []
     try:
         discovery_prompt = discover_additional_markets_prompt(
             idea_context=idea_context, base_markets=base_markets, max_new=5
         )
-        discovery = get_vertex_structured(
+        discovery_result = get_vertex_structured(
             discovery_prompt,
             AdditionalMarketCandidatesResponse,
             smartness=SmartnessLevel.LOW,
+            use_internet=True,
             config=run_config,
         )
+        if isinstance(discovery_result, tuple):
+            discovery, discovery_links = discovery_result
+        else:
+            discovery = discovery_result
         if isinstance(discovery, AdditionalMarketCandidatesResponse):
             additional_candidates = discovery.candidates
     except Exception:
         additional_candidates = []
 
     additional_sized: list[MarketSizing] = []
+    sizing_links: list[str] = []
     try:
         if additional_candidates:
             sizing_prompt = market_sizing_prompt(
                 idea_context=idea_context, candidates=additional_candidates
             )
-            sizing = get_vertex_structured(
+            sizing_result = get_vertex_structured(
                 sizing_prompt,
                 MarketSizingResponse,
                 smartness=SmartnessLevel.HIGH,
+                use_internet=True,
                 config=run_config,
             )
+            if isinstance(sizing_result, tuple):
+                sizing, sizing_links = sizing_result
+            else:
+                sizing = sizing_result
             if isinstance(sizing, MarketSizingResponse):
                 additional_sized = sizing.items
     except Exception:
@@ -315,11 +327,12 @@ def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAna
         except Exception:
             pass
 
-    sizing_sources: list[str] = []
-    for sized in additional_sized:
-        sizing_sources.extend(sized.sources)
-
-    raw_sources = [*overview_response.links, *trends_response.links, *sizing_sources]
+    raw_sources = [
+        *overview_response.links,
+        *trends_response.links,
+        *discovery_links,
+        *sizing_links,
+    ]
     sources = resolve_links(raw_sources)
 
     return MarketAnalysis(
