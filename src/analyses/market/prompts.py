@@ -104,7 +104,7 @@ Focus ONLY on:
 3. Market maturity and structure
 4. What percentage of the market could a founder theoretically address (realistic TAM/SAM/SOM range)?
 
-Be thorough. Write 3-5 substantial paragraphs. Use concrete numbers. Be specific and grounded.
+ Write 2-3 paragraphs. Use concrete numbers. Be specific and grounded.
 
 Idea context:
 {idea_context}
@@ -145,7 +145,7 @@ Focus ONLY on:
 4. Regional or segment-level trends within the market
 5. Regulatory or technological shifts affecting market size
 
-Be thorough. Write 3-5 substantial paragraphs. Use concrete data where available.
+Be thorough. Write 2-3 paragraphs. Use concrete data where available.
 
 Idea context:
 {idea_context}
@@ -156,7 +156,7 @@ Markets (with size trajectories in USD millions):
 Sectors: {sectors}
 Average growth rate: {average_growth_rate}
 
-Write your extensive trends analysis as plain text. No JSON.
+Write your trends analysis as plain text.
 """.strip()
 
 
@@ -165,6 +165,8 @@ def market_strengths_prompt(
     markets: list[MarketEntry],
     sectors: list[str],
     average_growth_rate: str,
+    overview: str,
+    trends_analysis: str,
 ) -> str:
     payload = [
         {
@@ -176,10 +178,18 @@ def market_strengths_prompt(
         for m in markets
     ]
     return f"""
-You are a venture-style market analyst. List 5-7 market STRENGTHS.
+You are a venture-style market analyst. List 3-5 market STRENGTHS.
 
 CRITICAL: PURELY market-focused. No customers, competitors, or buyer personas.
 Strengths = positive aspects of the market itself: size, growth, structure, data quality, accessibility, etc.
+
+Base your analysis on the following market overview and trends.
+
+Market overview:
+{overview}
+
+Trends analysis:
+{trends_analysis}
 
 Idea context:
 {idea_context}
@@ -188,7 +198,7 @@ Markets: {payload}
 Sectors: {sectors}
 Average growth rate: {average_growth_rate}
 
-Return a JSON object with a single key "strengths" containing a list of 5-7 strings.
+Return a JSON object with a single key "strengths" containing a list of 3-5 strings.
 """.strip()
 
 
@@ -197,6 +207,8 @@ def market_weaknesses_prompt(
     markets: list[MarketEntry],
     sectors: list[str],
     average_growth_rate: str,
+    overview: str,
+    trends_analysis: str,
 ) -> str:
     payload = [
         {
@@ -208,10 +220,18 @@ def market_weaknesses_prompt(
         for m in markets
     ]
     return f"""
-You are a venture-style market analyst. List 5-7 market WEAKNESSES.
+You are a venture-style market analyst. List 3-5 market WEAKNESSES.
 
 CRITICAL: PURELY market-focused. No customers, competitors, or buyer personas.
 Weaknesses = negative aspects of the market itself: fragmentation, decline, poor data, saturation, etc.
+
+Base your analysis on the following market overview and trends.
+
+Market overview:
+{overview}
+
+Trends analysis:
+{trends_analysis}
 
 Idea context:
 {idea_context}
@@ -220,7 +240,7 @@ Markets: {payload}
 Sectors: {sectors}
 Average growth rate: {average_growth_rate}
 
-Return a JSON object with a single key "weaknesses" containing a list of 5-7 strings.
+Return a JSON object with a single key "weaknesses" containing a list of 3-5 strings.
 """.strip()
 
 
@@ -229,6 +249,8 @@ def market_synthesis_remaining_prompt(
     markets: list[MarketEntry],
     sectors: list[str],
     average_growth_rate: str,
+    overview: str,
+    trends_analysis: str,
 ) -> str:
     payload = [
         {
@@ -244,6 +266,14 @@ You are a venture-style market analyst.
 
 CRITICAL: PURELY market-focused. No customers, competitors, or buyer personas.
 Focus on: market data quality, gaps in the market, threats to market size, theoretical market share %, new market potential, why now.
+
+Base your analysis on the following market overview and trends.
+
+Market overview:
+{overview}
+
+Trends analysis:
+{trends_analysis}
 
 Idea context:
 {idea_context}

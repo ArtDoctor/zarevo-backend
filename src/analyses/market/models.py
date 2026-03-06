@@ -14,6 +14,17 @@ class MarketEntry(BaseModel):
     sizes_2023_2026_in_millions: list[int]
 
 
+class AdditionalMarketCandidate(BaseModel):
+    name: str
+    sector: str
+    why_relevant: str
+    suggested_search_queries: list[str]
+
+
+class AdditionalMarketCandidatesResponse(BaseModel):
+    candidates: list[AdditionalMarketCandidate]
+
+
 class MarketAnalysis(BaseModel):
     overview: str
     trends_analysis: str
