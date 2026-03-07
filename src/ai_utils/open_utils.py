@@ -250,6 +250,12 @@ def _build_prompt(smoke_input: SmokeInput) -> str:
     )
     images_text = ", ".join(smoke_input.images) if smoke_input.images else "None"
     api_base = settings.api_base_url.rstrip("/")
+    user_input_section = ""
+    if smoke_input.user_input.strip():
+        user_input_section = f"""
+
+Additional instructions from the user (follow these): {smoke_input.user_input.strip()}
+"""
     return f"""Create a landing page for this smoke test. The idea: {smoke_input.idea_description}
 
 CTA (call-to-action): {smoke_input.cta}
@@ -258,6 +264,7 @@ Features to highlight:
 {features_text}
 
 Image URLs (use as needed): {images_text}
+{user_input_section}
 
 Produce a single self-contained HTML file. The HTML must be fully self-contained: put all CSS inside a <style> tag and all JavaScript inside a <script> tag.
 No external links to .css or .js files.
@@ -285,7 +292,7 @@ def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
         model="anthropic/claude-sonnet-4.6",
         api_key=settings.openrouter_api_key,
         temperature=0.3,
-        max_tokens=8192,
+        max_tokens=65536,
     )
     messages: list[HumanMessage] = [
         HumanMessage(content=_build_prompt(smoke_input)),

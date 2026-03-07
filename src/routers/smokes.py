@@ -7,7 +7,6 @@ from src.pocketbase_client import PocketBaseClient, verify_pocketbase_token
 from src.smokes.models import (
     CreateSmokeRequest,
     PublishSmokeRequest,
-    SmokeFeature,
     SmokeSignupRequest,
 )
 from worker.worker import process_smoke_generation_task
@@ -76,6 +75,7 @@ def create_smoke(
         "cta": body.cta,
         "features": features_data,
         "images": body.images,
+        "user_input": body.user_input,
         "state": "in_progress",
     }
     try:

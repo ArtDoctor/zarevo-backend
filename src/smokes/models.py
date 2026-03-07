@@ -20,6 +20,7 @@ class CreateSmokeRequest(BaseModel):
     cta: str = Field(alias="CTA")
     features: list[SmokeFeature]
     images: list[str]
+    user_input: str = ""
 
     model_config = {"populate_by_name": True}
 
@@ -35,6 +36,7 @@ class SmokeInput(BaseModel):
     cta: str
     features: list[SmokeFeature]
     images: list[str]
+    user_input: str = ""
 
 
 class AdChannel(BaseModel):

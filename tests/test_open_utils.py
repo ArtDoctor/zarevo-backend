@@ -98,3 +98,29 @@ def test_generate_landing_page_raises_when_model_returns_invalid_html(
     )
     with pytest.raises(ValueError, match="did not return valid HTML"):
         generate_landing_page(smoke_input)
+
+
+@patch("src.ai_utils.open_utils.ChatOpenRouter")
+def test_generate_landing_page_includes_user_input_in_prompt(mock_router: MagicMock) -> None:
+    mock_response = MagicMock()
+    mock_response.content = """<!DOCTYPE html>
+<html><head><title>X</title></head>
+<body><h1>Done</h1></body></html>"""
+    mock_model = MagicMock()
+    mock_model.invoke.return_value = mock_response
+    mock_router.return_value = mock_model
+
+    smoke_input = SmokeInput(
+        idea_description="AI tool",
+        cta="Sign up",
+        features=[],
+        images=[],
+        user_input="Use dark theme and add a video section",
+    )
+    generate_landing_page(smoke_input)
+
+    call_args = mock_model.invoke.call_args
+    messages = call_args[0][0]
+    prompt = messages[0].content
+    assert "Use dark theme and add a video section" in prompt
+    assert "Additional instructions from the user" in prompt

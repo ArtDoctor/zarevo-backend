@@ -320,12 +320,14 @@ def process_smoke_generation_task(
         cta = smoke.cta if hasattr(smoke, "cta") else ""
         images_raw = smoke.images if hasattr(smoke, "images") else []
         images = list(images_raw) if isinstance(images_raw, list) else []
+        user_input = smoke.user_input if hasattr(smoke, "user_input") else ""
 
         smoke_input = SmokeInput(
             idea_description=idea_description,
             cta=cta,
             features=features,
             images=images,
+            user_input=user_input,
         )
         code = generate_landing_page(smoke_input)
 
