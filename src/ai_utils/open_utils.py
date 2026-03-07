@@ -244,6 +244,17 @@ _TEST_HTML = """<!DOCTYPE html>
 """
 
 
+def _build_idea_context(smoke_input: SmokeInput) -> str:
+    parts: list[str] = [f"Description: {smoke_input.idea_description}"]
+    if smoke_input.idea_title:
+        parts.append(f"Title: {smoke_input.idea_title}")
+    if smoke_input.idea_customer:
+        parts.append(f"Target customer: {smoke_input.idea_customer}")
+    if smoke_input.idea_geography:
+        parts.append(f"Geography: {smoke_input.idea_geography}")
+    return "\n".join(parts)
+
+
 def _build_prompt(smoke_input: SmokeInput) -> str:
     features_text = "\n".join(
         f"- {f.feature}: {f.description}" for f in smoke_input.features
@@ -256,7 +267,11 @@ def _build_prompt(smoke_input: SmokeInput) -> str:
 
 Additional instructions from the user (follow these): {smoke_input.user_input.strip()}
 """
-    return f"""Create a landing page for this smoke test. The idea: {smoke_input.idea_description}
+    idea_context = _build_idea_context(smoke_input)
+    return f"""Create a landing page for this smoke test.
+
+Idea context:
+{idea_context}
 
 CTA (call-to-action): {smoke_input.cta}
 

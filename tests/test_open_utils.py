@@ -101,6 +101,37 @@ def test_generate_landing_page_raises_when_model_returns_invalid_html(
 
 
 @patch("src.ai_utils.open_utils.ChatOpenRouter")
+def test_generate_landing_page_includes_idea_context_in_prompt(mock_router: MagicMock) -> None:
+    mock_response = MagicMock()
+    mock_response.content = """<!DOCTYPE html>
+<html><head><title>X</title></head>
+<body><h1>Done</h1></body></html>"""
+    mock_model = MagicMock()
+    mock_model.invoke.return_value = mock_response
+    mock_router.return_value = mock_model
+
+    smoke_input = SmokeInput(
+        idea_description="AI tool for warehouses",
+        cta="Sign up",
+        features=[],
+        images=[],
+        idea_title="Warehouse AI",
+        idea_customer="Warehouse ops teams",
+        idea_geography="US and EU",
+    )
+    generate_landing_page(smoke_input)
+
+    call_args = mock_model.invoke.call_args
+    messages = call_args[0][0]
+    prompt = messages[0].content
+    assert "Idea context:" in prompt
+    assert "Description: AI tool for warehouses" in prompt
+    assert "Title: Warehouse AI" in prompt
+    assert "Target customer: Warehouse ops teams" in prompt
+    assert "Geography: US and EU" in prompt
+
+
+@patch("src.ai_utils.open_utils.ChatOpenRouter")
 def test_generate_landing_page_includes_user_input_in_prompt(mock_router: MagicMock) -> None:
     mock_response = MagicMock()
     mock_response.content = """<!DOCTYPE html>

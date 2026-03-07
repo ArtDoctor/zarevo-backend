@@ -58,6 +58,7 @@ def _submit_idea_with_analyses(
                 "title": "",
                 "problem": idea.problem,
                 "customer": idea.customer,
+                "geography": idea.geography,
                 "founder_specific": idea.founder_specific,
                 "analyses": task_ids
             }

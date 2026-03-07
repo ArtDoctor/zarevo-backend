@@ -37,6 +37,9 @@ class SmokeInput(BaseModel):
     features: list[SmokeFeature]
     images: list[str]
     user_input: str = ""
+    idea_title: str = ""
+    idea_customer: str = ""
+    idea_geography: str = ""
 
 
 class AdChannel(BaseModel):

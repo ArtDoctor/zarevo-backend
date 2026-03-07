@@ -306,6 +306,9 @@ def process_smoke_generation_task(
 
         idea = pb_client.client.collection("ideas").get_one(idea_id)
         idea_description = idea.description if hasattr(idea, "description") else ""
+        idea_title = idea.title if hasattr(idea, "title") else ""
+        idea_customer = idea.customer if hasattr(idea, "customer") else ""
+        idea_geography = idea.geography if hasattr(idea, "geography") else ""
 
         features_raw = smoke.features if hasattr(smoke, "features") else []
         features = [
@@ -328,6 +331,9 @@ def process_smoke_generation_task(
             features=features,
             images=images,
             user_input=user_input,
+            idea_title=idea_title,
+            idea_customer=idea_customer,
+            idea_geography=idea_geography,
         )
         code = generate_landing_page(smoke_input)
 
