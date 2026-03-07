@@ -18,9 +18,10 @@ from src.analyses.competitor.competitor import get_competitor_analysis, get_exam
 from src.analyses.customer.customer import get_customer_analysis, get_example_customer_analysis
 from src.analyses.problem.problem import get_problem_analysis, get_example_problem_analysis
 from src.analyses.market.market import get_market_analysis, get_example_market_analysis
+from src.ai_utils.open_utils import generate_landing_page
 from src.ai_utils.vertex_utils import get_vertex_response
 from src.config import IdeaRequest
-from src.smokes.models import IdeaFeature
+from src.smokes.models import IdeaFeature, SmokeFeature, SmokeInput
 from src.smokes.prepare import get_test_smoke_features, prepare_smoke_features_from_analyses
 
 
@@ -254,3 +255,79 @@ def process_features_task(
         print(f"Error in features task: {e}")
     except Exception as e:
         print(f"Error processing features: {e}")
+
+
+@celery_app.task
+def process_smoke_generation_task(
+    smoke_id: str,
+    pocketbase_token: str | None = None,
+) -> None:
+    pb_client = _get_pocketbase_client(pocketbase_token)
+    if pb_client is None:
+        print("Cannot run smoke generation task: no PocketBase client")
+        return
+
+    try:
+        smoke = pb_client.client.collection("smokes").get_one(smoke_id)
+        idea_ref = smoke.idea if hasattr(smoke, "idea") else None
+        idea_id = idea_ref.id if hasattr(idea_ref, "id") else (
+            idea_ref if isinstance(idea_ref, str) else None
+        )
+        if not idea_id:
+            print(f"Smoke {smoke_id} has no idea relation")
+            return
+
+        idea = pb_client.client.collection("ideas").get_one(idea_id)
+        idea_description = idea.description if hasattr(idea, "description") else ""
+
+        features_raw = smoke.features if hasattr(smoke, "features") else []
+        features = [
+            SmokeFeature(
+                feature=f.get("feature", ""),
+                description=f.get("description", ""),
+                expected_signup_increase_pct=float(f.get("expected_signup_increase_pct", 0)),
+            )
+            for f in (features_raw if isinstance(features_raw, list) else [])
+            if isinstance(f, dict)
+        ]
+        cta = smoke.cta if hasattr(smoke, "cta") else ""
+        images_raw = smoke.images if hasattr(smoke, "images") else []
+        images = list(images_raw) if isinstance(images_raw, list) else []
+
+        smoke_input = SmokeInput(
+            idea_description=idea_description,
+            cta=cta,
+            features=features,
+            images=images,
+        )
+        code = generate_landing_page(smoke_input)
+
+        pb_client.client.collection("smokes").update(
+            smoke_id,
+            {
+                "html": code.html,
+                "css": code.css,
+                "js": code.js,
+                "state": "done",
+            },
+        )
+    except ClientResponseError as e:
+        print(f"Error in smoke generation task: {e}")
+        if pb_client is not None:
+            try:
+                pb_client.client.collection("smokes").update(
+                    smoke_id,
+                    {"state": "error"},
+                )
+            except Exception:
+                pass
+    except Exception as e:
+        print(f"Error processing smoke generation: {e}")
+        if pb_client is not None:
+            try:
+                pb_client.client.collection("smokes").update(
+                    smoke_id,
+                    {"state": "error"},
+                )
+            except Exception:
+                pass

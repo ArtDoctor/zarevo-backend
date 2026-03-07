@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     pocketbase_url: str
     openai_api_key: str
     vertex_ai_api_key: str
+    openrouter_api_key: str
 
     pocketbase_user: str
     pocketbase_password: str

@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel, Field
 
 
@@ -14,8 +16,35 @@ class IdeaFeature(BaseModel):
 
 
 class CreateSmokeRequest(BaseModel):
+    idea_id: str
     cta: str = Field(alias="CTA")
     features: list[SmokeFeature]
     images: list[str]
 
     model_config = {"populate_by_name": True}
+
+
+class SmokeCode(BaseModel):
+    html: str
+    css: str
+    js: str
+
+
+class SmokeInput(BaseModel):
+    idea_description: str
+    cta: str
+    features: list[SmokeFeature]
+    images: list[str]
+
+
+class AdChannel(BaseModel):
+    channel: str
+    advertised: str
+
+
+class PublishSmokeRequest(BaseModel):
+    smoke_id: str
+    duration: int
+    subdomain: str
+    start_date: date
+    ads_channels: list[AdChannel]
