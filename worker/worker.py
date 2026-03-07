@@ -42,6 +42,10 @@ _redis_transport_opts = {
 celery_app.conf.broker_transport_options = _redis_transport_opts
 celery_app.conf.result_backend_transport_options = _redis_transport_opts
 
+celery_app.conf.worker_cancel_long_running_tasks_on_connection_loss = True
+celery_app.conf.broker_connection_retry_on_startup = True
+celery_app.conf.broker_connection_retry = True
+
 
 ANALYSIS_HANDLERS: dict[str, Callable[[dict], BaseModel]] = {
     "legal": get_legal_analysis,
