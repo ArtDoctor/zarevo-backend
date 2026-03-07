@@ -5,7 +5,7 @@ import langsmith
 from pydantic import BaseModel
 
 from src.ai_utils.ai_utils import SmartnessLevel
-from src.ai_utils.vertex_utils import get_vertex_structured
+from src.ai_utils.openai_utils import get_openai_structured
 from src.analyses.customer.prompts import customer_analysis_prompt
 from src.analyses.problem.prompts import idea_context_for_prompt
 from src.config import IdeaRequest
@@ -55,7 +55,7 @@ def get_customer_analysis(idea: dict) -> CustomerAnalysis:
         validated = IdeaRequest.model_validate(idea)
         idea_context = idea_context_for_prompt(validated)
         prompt = customer_analysis_prompt(idea_context)
-        result = get_vertex_structured(
+        result = get_openai_structured(
             prompt,
             CustomerAnalysis,
             smartness=SmartnessLevel.MEDIUM,

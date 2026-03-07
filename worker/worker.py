@@ -19,7 +19,7 @@ from src.analyses.customer.customer import get_customer_analysis, get_example_cu
 from src.analyses.problem.problem import get_problem_analysis, get_example_problem_analysis
 from src.analyses.market.market import get_market_analysis, get_example_market_analysis
 from src.ai_utils.open_utils import generate_landing_page
-from src.ai_utils.vertex_utils import get_vertex_response
+from src.ai_utils.openai_utils import get_openai_response
 from src.config import IdeaRequest
 from src.smokes.models import IdeaFeature, SmokeFeature, SmokeInput
 from src.smokes.prepare import get_test_smoke_features, prepare_smoke_features_from_analyses
@@ -163,7 +163,7 @@ def process_title_task(
         title = (
             "Example Idea Title"
             if description == "test"
-            else get_vertex_response(_generate_title_prompt(description)).text
+            else get_openai_response(_generate_title_prompt(description))
         )
         pb_client = _get_pocketbase_client(pocketbase_token)
         if pb_client is not None:

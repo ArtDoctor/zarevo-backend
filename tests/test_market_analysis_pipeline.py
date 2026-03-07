@@ -92,6 +92,7 @@ def test_market_analysis_pipeline_orders_steps_and_matches_schema() -> None:
 
     with (
         patch("src.analyses.market.market.get_vertex_structured", side_effect=fake_structured),
+        patch("src.analyses.market.market.get_openai_structured", side_effect=fake_structured),
         patch("src.analyses.market.market.get_vertex_response", side_effect=fake_response),
     ):
         result = get_market_analysis(

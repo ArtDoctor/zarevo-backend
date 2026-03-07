@@ -19,7 +19,7 @@ def test_generate_landing_page_returns_predefined_when_idea_is_test() -> None:
     )
     result = generate_landing_page(smoke_input)
     assert "Test Product" in result.html
-    assert "styles.css" in result.html
-    assert "script.js" in result.html
-    assert "signup-btn" in result.css or "button" in result.css
-    assert "addEventListener" in result.js
+    assert "signup-btn" in result.html
+    assert "addEventListener" in result.html
+    assert result.css == ""
+    assert result.js == ""

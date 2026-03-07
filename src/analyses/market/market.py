@@ -7,6 +7,7 @@ import chromadb
 import langsmith
 
 from src.ai_utils.ai_utils import SmartnessLevel
+from src.ai_utils.openai_utils import get_openai_structured
 from src.ai_utils.vertex_utils import (
     VertexResponse,
     get_vertex_response,
@@ -286,7 +287,7 @@ def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAna
 
     def _get_strengths() -> list[str]:
         try:
-            r = get_vertex_structured(
+            r = get_openai_structured(
                 strengths_prompt,
                 StrengthsResponse,
                 smartness=SmartnessLevel.MEDIUM,
@@ -298,7 +299,7 @@ def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAna
 
     def _get_weaknesses() -> list[str]:
         try:
-            r = get_vertex_structured(
+            r = get_openai_structured(
                 weaknesses_prompt,
                 WeaknessesResponse,
                 smartness=SmartnessLevel.MEDIUM,
@@ -309,7 +310,7 @@ def _run_market_analysis(idea: dict, run_config: dict[str, object]) -> MarketAna
             return []
 
     def _get_remaining() -> MarketSynthesisRemaining:
-        return get_vertex_structured(
+        return get_openai_structured(
             remaining_prompt,
             MarketSynthesisRemaining,
             smartness=SmartnessLevel.MEDIUM,

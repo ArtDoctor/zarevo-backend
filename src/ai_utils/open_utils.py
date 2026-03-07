@@ -28,7 +28,14 @@ _TEST_HTML = """<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Test Landing Page</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { font-size: 2rem; color: #333; }
+    .cta { text-align: center; }
+    button { padding: 1rem 2rem; font-size: 1rem; cursor: pointer; }
+  </style>
 </head>
 <body>
   <header>
@@ -40,29 +47,20 @@ _TEST_HTML = """<!DOCTYPE html>
       <button id="signup-btn">Sign up now</button>
     </section>
   </main>
-  <script src="script.js"></script>
+  <script>
+    document.getElementById('signup-btn').addEventListener('click', () => {
+      alert('Thanks for signing up!');
+    });
+  </script>
 </body>
 </html>
-"""
-
-_TEST_CSS = """* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; padding: 2rem; }
-header { text-align: center; margin-bottom: 2rem; }
-h1 { font-size: 2rem; color: #333; }
-.cta { text-align: center; }
-button { padding: 1rem 2rem; font-size: 1rem; cursor: pointer; }
-"""
-
-_TEST_JS = """document.getElementById('signup-btn').addEventListener('click', () => {
-  alert('Thanks for signing up!');
-});
 """
 
 
 class StoreFileInput(BaseModel):
     file_type: str = Field(
         ...,
-        description="One of 'html', 'css', or 'js'. Call this tool exactly three times: once for each file type.",
+        description="Must be 'html'. Call this tool exactly once with the full self-contained HTML.",
     )
     content: str = Field(..., description="The full file content as a string.")
 
@@ -81,20 +79,17 @@ Features to highlight:
 
 Image URLs (use as needed): {images_text}
 
-You must produce exactly 3 files: index.html, styles.css, script.js. Use the store_file tool for each one.
+Produce a single self-contained HTML file. Use the store_file tool exactly once with file_type="html" and content=<full HTML string>.
 
-How to use store_file:
-1. Call store_file with file_type="html" and content=<full HTML string>. The HTML should link to styles.css and script.js.
-2. Call store_file with file_type="css" and content=<full CSS string>.
-3. Call store_file with file_type="js" and content=<full JS string>.
+The HTML must be fully self-contained: put all CSS inside a <style> tag and all JavaScript inside a <script> tag. No external links to .css or .js files.
 
-Make it look cool: modern typography, appealing colors, smooth interactions. The page should convert visitors into signups.
+Make it look cool: modern typography, appealing colors. The page should convert visitors into signups.
 """
 
 
 def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
     if smoke_input.idea_description.strip().lower() == "test":
-        return SmokeCode(html=_TEST_HTML, css=_TEST_CSS, js=_TEST_JS)
+        return SmokeCode(html=_TEST_HTML, css="", js="")
 
     model = ChatOpenRouter(
         model="anthropic/claude-sonnet-4.6",
@@ -104,7 +99,7 @@ def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
     )
     store_file_tool = StructuredTool.from_function(
         name="store_file",
-        description="Store a file. Call exactly 3 times: file_type='html', 'css', 'js' with full content.",
+        description="Store the HTML file. Call exactly once with file_type='html' and the full self-contained HTML content.",
         args_schema=StoreFileInput,
         func=lambda **kwargs: str(kwargs),
     )
@@ -130,8 +125,8 @@ def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
             _, args = _parse_tool_call(tc)
             file_type = args.get("file_type", "").lower()
             content = args.get("content", "")
-            if file_type in ("html", "css", "js"):
-                stored[file_type] = content
+            if file_type == "html":
+                stored["html"] = content
             messages.append(
                 ToolMessage(
                     content=f"Stored {file_type} file ({len(content)} chars)",
@@ -140,9 +135,7 @@ def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
             )
 
     html = stored.get("html", "")
-    css = stored.get("css", "")
-    js = stored.get("js", "")
-    if not html or not css or not js:
-        return SmokeCode(html=_TEST_HTML, css=_TEST_CSS, js=_TEST_JS)
+    if not html:
+        return SmokeCode(html=_TEST_HTML, css="", js="")
 
-    return SmokeCode(html=html, css=css, js=js)
+    return SmokeCode(html=html, css="", js="")

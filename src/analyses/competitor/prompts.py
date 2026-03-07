@@ -5,7 +5,7 @@ def competitor_discovery_prompt(idea_context: str) -> str:
     return f"""
 You are a venture-style competitive intelligence analyst.
 
-Task: Use web search to find 3-6 direct and indirect competitors for this idea. For each competitor, fill out all fields with real, researched data.
+Task: Use web search to find 3-6 direct and indirect competitors for this idea. For each competitor, fill out all fields with real, researched data. You don't have to be extremely extensive and precise; if info is hard to get, skip it.
 
 You MUST use Google search / web research to ground your findings. Find actual companies, products, or solutions. Include revenue estimates, feature comparisons, and real strengths/weaknesses where available.
 

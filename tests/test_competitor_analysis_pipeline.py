@@ -57,6 +57,10 @@ def test_competitor_analysis_pipeline_orders_steps_and_matches_schema() -> None:
             side_effect=fake_structured,
         ),
         patch(
+            "src.analyses.competitor.competitor.get_openai_structured",
+            side_effect=fake_structured,
+        ),
+        patch(
             "src.analyses.competitor.competitor.get_vertex_response",
             side_effect=fake_response,
         ),

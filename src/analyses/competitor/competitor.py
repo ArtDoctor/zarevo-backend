@@ -5,6 +5,7 @@ from pathlib import Path
 import langsmith
 
 from src.ai_utils.ai_utils import SmartnessLevel
+from src.ai_utils.openai_utils import get_openai_structured
 from src.ai_utils.vertex_utils import (
     VertexResponse,
     get_vertex_response,
@@ -102,7 +103,7 @@ def _run_competitor_analysis(
 
     score = 0
     try:
-        synthesis_result = get_vertex_structured(
+        synthesis_result = get_openai_structured(
             competitor_synthesis_prompt(
                 idea_context, competitors, overview_response.text
             ),
