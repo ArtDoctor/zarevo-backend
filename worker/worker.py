@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 
@@ -23,6 +24,9 @@ from src.ai_utils.openai_utils import get_openai_response
 from src.config import IdeaRequest
 from src.smokes.models import IdeaFeature, SmokeFeature, SmokeInput
 from src.smokes.prepare import get_test_smoke_features, prepare_smoke_features_from_analyses
+
+
+_log = logging.getLogger(__name__)
 
 
 class TaskError(BaseModel):
@@ -91,6 +95,25 @@ def _get_pocketbase_client(pocketbase_token: str | None) -> PocketBaseClient | N
     return pb_client
 
 
+def _update_smoke_error_state(
+    pb_client: PocketBaseClient | None,
+    smoke_id: str,
+    error_msg: str,
+) -> None:
+    if pb_client is None:
+        return
+    try:
+        pb_client.client.collection("smokes").update(
+            smoke_id,
+            {"state": "error", "error": error_msg},
+        )
+    except Exception:
+        try:
+            pb_client.client.collection("smokes").update(smoke_id, {"state": "error"})
+        except Exception as update_err:
+            _log.exception("Failed to update smoke error state: %s", update_err)
+
+
 def _update_task_status(
     pb_client: PocketBaseClient | None,
     task_id: str,
@@ -98,7 +121,7 @@ def _update_task_status(
     result: dict | None = None,
 ) -> None:
     if pb_client is None:
-        print("Cannot update task status: no PocketBase client")
+        _log.warning("Cannot update task status: no PocketBase client")
         return
     body: dict[str, str | dict] = {"status": status.value}
     if result is not None:
@@ -107,7 +130,7 @@ def _update_task_status(
     try:
         pb_client.client.collection("analyses").update(task_id, body)
     except ClientResponseError as e:
-        print(f"Error updating task status: {e}")
+        _log.exception("Error updating task status: %s", e)
 
 
 @celery_app.task
@@ -137,7 +160,7 @@ def process_idea_task(
         _update_task_status(pb_client, analysis_id, Status.DONE, result.model_dump())
 
     except Exception as e:
-        print(f"Error processing task: {e}")
+        _log.exception("Error processing task: %s", e)
         _update_task_status(
             pb_client, analysis_id, Status.ERROR, TaskError(error=str(e)).model_dump()
         )
@@ -169,7 +192,7 @@ def process_title_task(
         if pb_client is not None:
             pb_client.client.collection("ideas").update(idea_id, {"title": title})
     except Exception as e:
-        print(f"Error generating title: {e}")
+        _log.exception("Error generating title: %s", e)
 
 
 def _get_analysis_ids(idea: object) -> list[str]:
@@ -221,7 +244,7 @@ def process_features_task(
 ) -> None:
     pb_client = _get_pocketbase_client(pocketbase_token)
     if pb_client is None:
-        print("Cannot run features task: no PocketBase client")
+        _log.error("Cannot run features task: no PocketBase client")
         return
 
     try:
@@ -237,7 +260,7 @@ def process_features_task(
         else:
             analyses_by_type = _wait_for_features_analyses(pb_client, idea)
             if analyses_by_type is None:
-                print(f"Features task timed out waiting for analyses on idea {idea_id}")
+                _log.error("Features task timed out waiting for analyses on idea %s", idea_id)
                 return
             smoke_features = prepare_smoke_features_from_analyses(
                 analyses_by_type["customer"],
@@ -256,9 +279,9 @@ def process_features_task(
         features_data = {"features": [x.model_dump() for x in idea_features]}
         pb_client.client.collection("ideas").update(idea_id, features_data)
     except ClientResponseError as e:
-        print(f"Error in features task: {e}")
+        _log.exception("Error in features task: %s", e)
     except Exception as e:
-        print(f"Error processing features: {e}")
+        _log.exception("Error processing features: %s", e)
 
 
 @celery_app.task
@@ -268,7 +291,7 @@ def process_smoke_generation_task(
 ) -> None:
     pb_client = _get_pocketbase_client(pocketbase_token)
     if pb_client is None:
-        print("Cannot run smoke generation task: no PocketBase client")
+        _log.error("Cannot run smoke generation task: no PocketBase client")
         return
 
     try:
@@ -278,7 +301,7 @@ def process_smoke_generation_task(
             idea_ref if isinstance(idea_ref, str) else None
         )
         if not idea_id:
-            print(f"Smoke {smoke_id} has no idea relation")
+            _log.error("Smoke %s has no idea relation", smoke_id)
             return
 
         idea = pb_client.client.collection("ideas").get_one(idea_id)
@@ -315,23 +338,10 @@ def process_smoke_generation_task(
                 "state": "done",
             },
         )
+        _log.info("Smoke %s landing page generated successfully", smoke_id)
     except ClientResponseError as e:
-        print(f"Error in smoke generation task: {e}")
-        if pb_client is not None:
-            try:
-                pb_client.client.collection("smokes").update(
-                    smoke_id,
-                    {"state": "error"},
-                )
-            except Exception:
-                pass
+        _log.exception("PocketBase error in smoke generation task for smoke_id=%s: %s", smoke_id, e)
+        _update_smoke_error_state(pb_client, smoke_id, str(e))
     except Exception as e:
-        print(f"Error processing smoke generation: {e}")
-        if pb_client is not None:
-            try:
-                pb_client.client.collection("smokes").update(
-                    smoke_id,
-                    {"state": "error"},
-                )
-            except Exception:
-                pass
+        _log.exception("Smoke generation failed for smoke_id=%s: %s", smoke_id, e)
+        _update_smoke_error_state(pb_client, smoke_id, str(e))
