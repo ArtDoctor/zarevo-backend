@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     langsmith_api_key: str
     langsmith_project: str
 
+    api_base_url: str = "https://jo4gokk8s40c4gg848wow4ks.yza.yazero.io"
+
 
 settings = Settings()
 

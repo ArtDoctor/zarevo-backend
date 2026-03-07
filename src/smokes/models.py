@@ -48,3 +48,9 @@ class PublishSmokeRequest(BaseModel):
     subdomain: str
     start_date: date
     ads_channels: list[AdChannel]
+
+
+class SmokeSignupRequest(BaseModel):
+    subdomain: str
+    email: str
+    text: str

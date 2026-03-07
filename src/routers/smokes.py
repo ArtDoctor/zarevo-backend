@@ -4,11 +4,64 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pocketbase.errors import ClientResponseError
 
 from src.pocketbase_client import PocketBaseClient, verify_pocketbase_token
-from src.smokes.models import CreateSmokeRequest, PublishSmokeRequest, SmokeFeature
+from src.smokes.models import (
+    CreateSmokeRequest,
+    PublishSmokeRequest,
+    SmokeFeature,
+    SmokeSignupRequest,
+)
 from worker.worker import process_smoke_generation_task
 
 
 router = APIRouter(prefix="/api/smokes", tags=["smokes"])
+
+
+def _escape_filter_value(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _resolve_subdomain_for_lookup(subdomain: str) -> str:
+    if subdomain in ("localhost", "127", "127.0.0.1"):
+        return "test"
+    return subdomain
+
+
+@router.post("/signup")
+def smoke_signup(body: SmokeSignupRequest) -> dict[str, str]:
+    pb_client = PocketBaseClient.for_admin()
+    client = pb_client.client
+    lookup_subdomain = _resolve_subdomain_for_lookup(body.subdomain)
+    escaped_subdomain = _escape_filter_value(lookup_subdomain)
+    try:
+        smoke = client.collection("smokes").get_first_list_item(
+            f'domain="{escaped_subdomain}"'
+        )
+    except ClientResponseError as e:
+        if e.status == 404:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Smoke test not found for this subdomain",
+            ) from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to find smoke: {e}",
+        ) from e
+
+    try:
+        client.collection("smokes_emails").create(
+            {
+                "smoke": smoke.id,
+                "email": body.email,
+                "additional_info": body.text,
+            }
+        )
+    except ClientResponseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create signup record: {e}",
+        ) from e
+
+    return {"message": "Signed up successfully"}
 
 
 @router.post("/create")

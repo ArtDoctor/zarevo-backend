@@ -203,3 +203,55 @@ def test_publish_success_deducts_credits_and_updates_smoke(client: TestClient) -
         ]
     finally:
         app.dependency_overrides.pop(verify_pocketbase_token, None)
+
+
+@patch("src.routers.smokes.PocketBaseClient")
+def test_signup_no_auth_required(mock_pb_class: MagicMock, client: TestClient) -> None:
+    mock_pb = MagicMock()
+    mock_smoke = MagicMock()
+    mock_smoke.id = "smoke-xyz"
+    mock_pb.client.collection.return_value.get_first_list_item.return_value = mock_smoke
+    mock_pb_class.for_admin.return_value = mock_pb
+
+    response = client.post(
+        "/api/smokes/signup",
+        json={
+            "subdomain": "my-landing",
+            "email": "user@example.com",
+            "text": "I want early access",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json() == {"message": "Signed up successfully"}
+    mock_pb.client.collection.return_value.get_first_list_item.assert_called_once_with(
+        'domain="my-landing"'
+    )
+    create_call = mock_pb.client.collection.return_value.create.call_args
+    assert create_call[0][0] == {
+        "smoke": "smoke-xyz",
+        "email": "user@example.com",
+        "additional_info": "I want early access",
+    }
+
+
+@patch("src.routers.smokes.PocketBaseClient")
+def test_signup_returns_404_when_smoke_not_found(
+    mock_pb_class: MagicMock, client: TestClient
+) -> None:
+    from pocketbase.errors import ClientResponseError
+
+    mock_pb = MagicMock()
+    err = ClientResponseError("", status=404, message="Not found")
+    mock_pb.client.collection.return_value.get_first_list_item.side_effect = err
+    mock_pb_class.for_admin.return_value = mock_pb
+
+    response = client.post(
+        "/api/smokes/signup",
+        json={
+            "subdomain": "unknown-sub",
+            "email": "user@example.com",
+            "text": "Hello",
+        },
+    )
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower()
