@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.routers import admin, ideas
+from src.routers import admin, ideas, smokes
 
 app = FastAPI()
 app.add_middleware(
@@ -12,6 +12,7 @@ app.add_middleware(
 )
 app.include_router(ideas.router)
 app.include_router(admin.router)
+app.include_router(smokes.router)
 
 
 @app.get("/health")

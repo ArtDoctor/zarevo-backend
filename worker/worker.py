@@ -20,6 +20,8 @@ from src.analyses.problem.problem import get_problem_analysis, get_example_probl
 from src.analyses.market.market import get_market_analysis, get_example_market_analysis
 from src.ai_utils.vertex_utils import get_vertex_response
 from src.config import IdeaRequest
+from src.smokes.models import IdeaFeature
+from src.smokes.prepare import get_test_smoke_features, prepare_smoke_features_from_analyses
 
 
 class TaskError(BaseModel):
@@ -52,6 +54,10 @@ ANALYSIS_HANDLERS: dict[str, Callable[[dict], BaseModel]] = {
 
 BASIC_ANALYSIS_TYPES: tuple[str, ...] = ("market", "customer", "problem")
 ADVANCED_ANALYSIS_TYPES: tuple[str, ...] = tuple(ANALYSIS_HANDLERS.keys())
+
+FEATURES_ANALYSIS_TYPES_NEEDED = frozenset({"customer", "competitor", "problem"})
+FEATURES_POLL_INTERVAL_SEC = 5
+FEATURES_MAX_POLLS = 220
 
 ANALYSIS_EXAMPLE_LOADERS: dict[str, Callable[[], BaseModel]] = {
     "legal": get_example_legal_analysis,
@@ -159,3 +165,92 @@ def process_title_task(
             pb_client.client.collection("ideas").update(idea_id, {"title": title})
     except Exception as e:
         print(f"Error generating title: {e}")
+
+
+def _get_analysis_ids(idea: object) -> list[str]:
+    try:
+        val = idea.analyses
+    except AttributeError:
+        return []
+    if not isinstance(val, list):
+        return []
+    return [x for x in val if isinstance(x, str)]
+
+
+def _wait_for_features_analyses(
+    pb_client: PocketBaseClient,
+    idea: object,
+) -> dict[str, dict] | None:
+    analysis_ids = _get_analysis_ids(idea)
+    for _ in range(FEATURES_MAX_POLLS):
+        analyses_by_type: dict[str, dict] = {}
+        for aid in analysis_ids:
+            try:
+                rec = pb_client.client.collection("analyses").get_one(aid)
+            except ClientResponseError:
+                continue
+            try:
+                atype = rec.type
+                status_val = rec.status
+                result = rec.result
+            except AttributeError:
+                continue
+            if atype not in FEATURES_ANALYSIS_TYPES_NEEDED:
+                continue
+            if status_val != "done":
+                break
+            if result is None or not isinstance(result, dict):
+                continue
+            analyses_by_type[atype] = result
+        else:
+            if FEATURES_ANALYSIS_TYPES_NEEDED <= set(analyses_by_type.keys()):
+                return analyses_by_type
+        time.sleep(FEATURES_POLL_INTERVAL_SEC)
+    return None
+
+
+@celery_app.task
+def process_features_task(
+    idea_id: str,
+    pocketbase_token: str | None = None,
+) -> None:
+    pb_client = _get_pocketbase_client(pocketbase_token)
+    if pb_client is None:
+        print("Cannot run features task: no PocketBase client")
+        return
+
+    try:
+        idea = pb_client.client.collection("ideas").get_one(idea_id)
+        try:
+            description = idea.description or ""
+        except AttributeError:
+            description = ""
+        is_test = str(description).strip().lower() == "test"
+
+        if is_test:
+            smoke_features = get_test_smoke_features()
+        else:
+            analyses_by_type = _wait_for_features_analyses(pb_client, idea)
+            if analyses_by_type is None:
+                print(f"Features task timed out waiting for analyses on idea {idea_id}")
+                return
+            smoke_features = prepare_smoke_features_from_analyses(
+                analyses_by_type["customer"],
+                analyses_by_type["competitor"],
+                analyses_by_type["problem"],
+            )
+
+        idea_features = [
+            IdeaFeature(
+                title=f.feature,
+                description=f.description,
+                expected_signup_increase_pct=f.expected_signup_increase_pct,
+            )
+            for f in smoke_features
+        ]
+        features_data = {"features": [x.model_dump() for x in idea_features]}
+        pb_client.client.collection("ideas").update(idea_id, features_data)
+    except ClientResponseError as e:
+        print(f"Error in features task: {e}")
+    except Exception as e:
+        print(f"Error processing features: {e}")

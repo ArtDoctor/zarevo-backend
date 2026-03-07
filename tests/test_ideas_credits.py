@@ -88,11 +88,13 @@ def test_submit_idea_advanced_insufficient_credits_returns_402(client: TestClien
         app.dependency_overrides.pop(verify_pocketbase_token, None)
 
 
+@patch("src.routers.ideas.process_features_task")
 @patch("src.routers.ideas.process_idea_task")
 @patch("src.routers.ideas.process_title_task")
 def test_submit_idea_deducts_1_credit_after_success(
     mock_title_task: MagicMock,
     mock_idea_task: MagicMock,
+    mock_features_task: MagicMock,
     client: TestClient,
 ) -> None:
     deduct_called: list[int] = []
@@ -111,15 +113,18 @@ def test_submit_idea_deducts_1_credit_after_success(
         )
         assert response.status_code == 200
         assert deduct_called == [1]
+        mock_features_task.delay.assert_not_called()
     finally:
         app.dependency_overrides.pop(verify_pocketbase_token, None)
 
 
+@patch("src.routers.ideas.process_features_task")
 @patch("src.routers.ideas.process_idea_task")
 @patch("src.routers.ideas.process_title_task")
 def test_submit_idea_advanced_deducts_4_credits_after_success(
     mock_title_task: MagicMock,
     mock_idea_task: MagicMock,
+    mock_features_task: MagicMock,
     client: TestClient,
 ) -> None:
     deduct_called: list[int] = []
@@ -138,6 +143,7 @@ def test_submit_idea_advanced_deducts_4_credits_after_success(
         )
         assert response.status_code == 200
         assert deduct_called == [4]
+        mock_features_task.delay.assert_called_once_with("idea-1", "token")
     finally:
         app.dependency_overrides.pop(verify_pocketbase_token, None)
 
@@ -169,11 +175,13 @@ def test_submit_idea_does_not_deduct_credits_when_description_is_test(
         app.dependency_overrides.pop(verify_pocketbase_token, None)
 
 
+@patch("src.routers.ideas.process_features_task")
 @patch("src.routers.ideas.process_idea_task")
 @patch("src.routers.ideas.process_title_task")
 def test_submit_idea_advanced_does_not_deduct_credits_when_description_is_test(
     mock_title_task: MagicMock,
     mock_idea_task: MagicMock,
+    mock_features_task: MagicMock,
     client: TestClient,
 ) -> None:
     deduct_called: list[int] = []

@@ -5,6 +5,7 @@ from src.pocketbase_client import PocketBaseClient, verify_pocketbase_token
 from worker.worker import (
     ADVANCED_ANALYSIS_TYPES,
     BASIC_ANALYSIS_TYPES,
+    process_features_task,
     process_idea_task,
     process_title_task,
     Status,
@@ -72,6 +73,8 @@ def _submit_idea_with_analyses(
     if not is_test:
         pb_client.deduct_user_credits(user_id, credit_cost)
     process_title_task.delay(idea_record.id, idea.description, auth_token)
+    if task_types == ADVANCED_ANALYSIS_TYPES:
+        process_features_task.delay(idea_record.id, auth_token)
 
     return {
         "message": "Processing started",
