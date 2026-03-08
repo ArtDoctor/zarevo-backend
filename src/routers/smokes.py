@@ -81,6 +81,7 @@ def create_smoke(
         "images": body.images,
         "user_input": body.user_input,
         "state": "in_progress",
+        "idea": body.idea_id,
     }
     try:
         record = client.collection("smokes").create(record_data)

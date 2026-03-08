@@ -74,6 +74,7 @@ def test_create_success_returns_id(mock_task: MagicMock, client: TestClient) -> 
         assert passed_data["state"] == "in_progress"
         assert len(passed_data["features"]) == 1
         assert passed_data["images"] == ["https://example.com/img1.png"]
+        assert passed_data["idea"] == "idea-456"
         mock_task.delay.assert_called_once_with("smoke-123", "token", "idea-456")
     finally:
         app.dependency_overrides.pop(verify_pocketbase_token, None)
