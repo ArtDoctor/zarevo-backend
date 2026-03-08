@@ -69,12 +69,12 @@ def test_create_success_returns_id(mock_task: MagicMock, client: TestClient) -> 
         create_call = mock_pb.client.collection.return_value.create.call_args
         assert create_call is not None
         passed_data = create_call[0][0] if create_call[0] else create_call[1]
-        assert passed_data["idea"] == "idea-456"
+        assert passed_data["author"] == "user-123"
         assert passed_data["cta"] == "Get early access"
         assert passed_data["state"] == "in_progress"
         assert len(passed_data["features"]) == 1
         assert passed_data["images"] == ["https://example.com/img1.png"]
-        mock_task.delay.assert_called_once_with("smoke-123", "token")
+        mock_task.delay.assert_called_once_with("smoke-123", "token", "idea-456")
     finally:
         app.dependency_overrides.pop(verify_pocketbase_token, None)
 
@@ -100,10 +100,8 @@ def test_publish_insufficient_credits_returns_402(client: TestClient) -> None:
     mock_pb = _make_mock_pb_client()
     mock_pb.get_user_credits.return_value = 1
     mock_smoke = MagicMock()
-    mock_smoke.idea = "idea-1"
-    mock_idea = MagicMock()
-    mock_idea.author = "user-123"
-    mock_pb.client.collection.return_value.get_one.side_effect = [mock_smoke, mock_idea]
+    mock_smoke.author = "user-123"
+    mock_pb.client.collection.return_value.get_one.return_value = mock_smoke
     app.dependency_overrides[verify_pocketbase_token] = lambda: mock_pb
 
     try:
@@ -132,10 +130,8 @@ def test_publish_forbidden_when_not_owner(client: TestClient) -> None:
     mock_pb = _make_mock_pb_client()
     mock_pb.get_user_credits.return_value = 10
     mock_smoke = MagicMock()
-    mock_smoke.idea = "idea-1"
-    mock_idea = MagicMock()
-    mock_idea.author = "other-user"
-    mock_pb.client.collection.return_value.get_one.side_effect = [mock_smoke, mock_idea]
+    mock_smoke.author = "other-user"
+    mock_pb.client.collection.return_value.get_one.return_value = mock_smoke
     app.dependency_overrides[verify_pocketbase_token] = lambda: mock_pb
 
     try:
@@ -168,10 +164,8 @@ def test_publish_success_deducts_credits_and_updates_smoke(client: TestClient) -
     mock_pb.deduct_user_credits.side_effect = capture_deduct
 
     mock_smoke = MagicMock()
-    mock_smoke.idea = "idea-1"
-    mock_idea = MagicMock()
-    mock_idea.author = "user-123"
-    mock_pb.client.collection.return_value.get_one.side_effect = [mock_smoke, mock_idea]
+    mock_smoke.author = "user-123"
+    mock_pb.client.collection.return_value.get_one.return_value = mock_smoke
     app.dependency_overrides[verify_pocketbase_token] = lambda: mock_pb
 
     try:

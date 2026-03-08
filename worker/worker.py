@@ -288,22 +288,19 @@ def process_features_task(
 def process_smoke_generation_task(
     smoke_id: str,
     pocketbase_token: str | None = None,
+    idea_id: str | None = None,
 ) -> None:
     pb_client = _get_pocketbase_client(pocketbase_token)
     if pb_client is None:
         _log.error("Cannot run smoke generation task: no PocketBase client")
         return
 
+    if not idea_id:
+        _log.error("Smoke %s has no idea_id", smoke_id)
+        return
+
     try:
         smoke = pb_client.client.collection("smokes").get_one(smoke_id)
-        idea_ref = smoke.idea if hasattr(smoke, "idea") else None
-        idea_id = idea_ref.id if hasattr(idea_ref, "id") else (
-            idea_ref if isinstance(idea_ref, str) else None
-        )
-        if not idea_id:
-            _log.error("Smoke %s has no idea relation", smoke_id)
-            return
-
         idea = pb_client.client.collection("ideas").get_one(idea_id)
         idea_description = idea.description if hasattr(idea, "description") else ""
         idea_title = idea.title if hasattr(idea, "title") else ""

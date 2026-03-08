@@ -68,10 +68,14 @@ def create_smoke(
     body: CreateSmokeRequest,
     pb_client: PocketBaseClient = Depends(verify_pocketbase_token),
 ) -> dict[str, str]:
+    user_id = pb_client.get_current_user_id()
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User not authenticated")
+
     client = pb_client.client
     features_data = [f.model_dump() for f in body.features]
     record_data = {
-        "idea": body.idea_id,
+        "author": user_id,
         "cta": body.cta,
         "features": features_data,
         "images": body.images,
@@ -81,7 +85,7 @@ def create_smoke(
     try:
         record = client.collection("smokes").create(record_data)
         auth_token = pb_client.get_auth_token()
-        process_smoke_generation_task.delay(record.id, auth_token)
+        process_smoke_generation_task.delay(record.id, auth_token, body.idea_id)
         return {"id": record.id}
     except ClientResponseError as e:
         raise HTTPException(
@@ -111,18 +115,13 @@ def publish_smoke(
     except ClientResponseError as e:
         raise HTTPException(status_code=404, detail="Smoke not found") from e
 
-    idea_ref = smoke.idea if hasattr(smoke, "idea") else None
-    idea_id = idea_ref.id if hasattr(idea_ref, "id") else (
-        idea_ref if isinstance(idea_ref, str) else None
+    author_ref = smoke.author if hasattr(smoke, "author") else None
+    author_id = author_ref.id if hasattr(author_ref, "id") else (
+        author_ref if isinstance(author_ref, str) else None
     )
-    if not idea_id:
-        raise HTTPException(status_code=404, detail="Smoke has no linked idea")
+    if not author_id:
+        raise HTTPException(status_code=404, detail="Smoke has no author")
 
-    idea = client.collection("ideas").get_one(idea_id)
-    idea_author = idea.author if hasattr(idea, "author") else None
-    author_id = idea_author.id if hasattr(idea_author, "id") else (
-        idea_author if isinstance(idea_author, str) else None
-    )
     if author_id != user_id:
         raise HTTPException(status_code=403, detail="Not authorized to publish this smoke")
 
