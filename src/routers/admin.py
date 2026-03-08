@@ -10,7 +10,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from src.config import IdeaRequest
-from worker.worker import ANALYSIS_EXAMPLE_LOADERS, ANALYSIS_HANDLERS
+from worker.worker import (
+    ANALYSIS_EXAMPLE_LOADERS,
+    ANALYSIS_HANDLERS,
+)
 
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])

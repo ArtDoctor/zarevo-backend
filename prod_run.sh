@@ -2,9 +2,10 @@
 set -e
 
 [ -f .env ] && set -a && source .env && set +a
+[ -d venv ] && source venv/bin/activate
 
 echo "Starting Celery worker..."
-celery -A worker.worker worker --loglevel=info &
+celery -A worker.worker worker --loglevel=info -P gevent -c 30 &
 CELERY_PID=$!
 
 trap "kill $CELERY_PID 2>/dev/null || true; exit" EXIT TERM INT
