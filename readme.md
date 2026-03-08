@@ -2,6 +2,8 @@
 
 FastAPI backend + Celery worker for idea analysis and smoke page generation. Uses PocketBase for data, Redis for Celery broker/backend, and LLMs (OpenAI, OpenRouter, Vertex AI) for analyses.
 
+To see frontend, visit [https://github.com/ArtDoctor/zarevo](https://github.com/ArtDoctor/zarevo).
+
 ### How analyses work
 
 Each analysis type (market, customer, problem, competitor, technical, legal, financial) runs as a Celery task. The idea description plus optional fields (problem, customer, geography, founder_specific) are turned into prompts; LLMs return structured outputs (Pydantic models). Market analysis uses ChromaDB to match the idea to industries before sizing. Advanced runs all 7 analyses, then derive features from customer/competitor/problem for smoke pages.
