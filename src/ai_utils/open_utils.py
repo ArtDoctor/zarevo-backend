@@ -4,6 +4,7 @@ import re
 from langchain_core.messages import HumanMessage
 from langchain_openrouter import ChatOpenRouter
 
+from src.ai_utils.retry import run_with_retry
 from src.config import settings
 from src.smokes.models import SmokeCode, SmokeInput
 
@@ -313,24 +314,21 @@ def generate_landing_page(smoke_input: SmokeInput) -> SmokeCode:
         HumanMessage(content=_build_prompt(smoke_input)),
     ]
 
-    try:
-        response = model.invoke(messages)
-        text = _extract_text(response.content)
-        html = _extract_html_from_response(text)
+    def _invoke():
+        return model.invoke(messages)
 
-        if not html or ("<html" not in html.lower() and "<!doctype" not in html.lower()):
-            _log.error(
-                "Claude did not return valid HTML. Response length=%d, preview=%s",
-                len(text),
-                repr(text[:500]) if text else "empty",
-            )
-            raise ValueError(
-                "Landing page generation failed: model did not return valid HTML"
-            )
+    response = run_with_retry(_invoke)
+    text = _extract_text(response.content)
+    html = _extract_html_from_response(text)
 
-        return SmokeCode(html=html, css="", js="")
-    except ValueError:
-        raise
-    except Exception as e:
-        _log.exception("Landing page generation failed: %s", e)
-        raise
+    if not html or ("<html" not in html.lower() and "<!doctype" not in html.lower()):
+        _log.error(
+            "Claude did not return valid HTML. Response length=%d, preview=%s",
+            len(text),
+            repr(text[:500]) if text else "empty",
+        )
+        raise ValueError(
+            "Landing page generation failed: model did not return valid HTML"
+        )
+
+    return SmokeCode(html=html, css="", js="")

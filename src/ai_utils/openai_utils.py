@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
 from src.ai_utils.ai_utils import SmartnessLevel
+from src.ai_utils.retry import run_with_retry
 from src.config import settings
 
 
@@ -17,8 +18,12 @@ def _get_openai_model(smartness: SmartnessLevel) -> ChatOpenAI:
 
 def get_openai_response(prompt: str, smartness: SmartnessLevel = SmartnessLevel.LOW) -> str:
     model = _get_openai_model(smartness)
-    response = model.invoke(prompt)
-    return response.content
+
+    def _invoke() -> str:
+        response = model.invoke(prompt)
+        return response.content
+
+    return run_with_retry(_invoke)
 
 
 def _extract_json_from_text(text: str) -> str:
@@ -43,11 +48,15 @@ def get_openai_structured(
 ) -> BaseModel:
     model = _get_openai_model(smartness)
     structured_model = model.with_structured_output(response_model)
-    result = structured_model.invoke(prompt, config=config or {})
-    if isinstance(result, response_model):
-        return result
-    if isinstance(result, dict):
-        return response_model.model_validate(result)
-    text = str(result) if result is not None else ""
-    json_str = _extract_json_from_text(text)
-    return response_model.model_validate_json(json_str)
+
+    def _invoke() -> BaseModel:
+        result = structured_model.invoke(prompt, config=config or {})
+        if isinstance(result, response_model):
+            return result
+        if isinstance(result, dict):
+            return response_model.model_validate(result)
+        text = str(result) if result is not None else ""
+        json_str = _extract_json_from_text(text)
+        return response_model.model_validate_json(json_str)
+
+    return run_with_retry(_invoke)

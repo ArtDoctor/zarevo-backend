@@ -6,6 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel
 
 from src.ai_utils.ai_utils import SmartnessLevel
+from src.ai_utils.retry import run_with_retry
 from src.config import settings
 
 
@@ -146,7 +147,11 @@ def get_vertex_response(
     model = _get_vertex_model(smartness)
     if use_internet:
         model = model.bind_tools([{"google_search": {}}])
-    message = model.invoke(prompt, config=config or {})
+
+    def _invoke():
+        return model.invoke(prompt, config=config or {})
+
+    message = run_with_retry(_invoke)
     content = message.content
 
     response_metadata: object = {}
@@ -183,7 +188,11 @@ def get_vertex_structured(
     model = _get_vertex_model(smartness)
     if use_internet:
         model = model.bind_tools([{"google_search": {}}])
-        message = model.invoke(prompt, config=config or {})
+
+        def _invoke_internet():
+            return model.invoke(prompt, config=config or {})
+
+        message = run_with_retry(_invoke_internet)
         response_metadata: object = {}
         if hasattr(message, "response_metadata"):
             response_metadata = message.response_metadata
@@ -193,7 +202,11 @@ def get_vertex_structured(
         result = response_model.model_validate_json(json_str)
         return (result, links)
     structured_model = model.with_structured_output(response_model)
-    result = structured_model.invoke(prompt, config=config or {})
+
+    def _invoke_structured():
+        return structured_model.invoke(prompt, config=config or {})
+
+    result = run_with_retry(_invoke_structured)
     if isinstance(result, response_model):
         return result
     return response_model.model_validate(result)
